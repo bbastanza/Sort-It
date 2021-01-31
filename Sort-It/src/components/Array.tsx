@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState, useRef } from "react";
 import { Bar } from "react-chartjs-2";
 import { shuffleArray } from "../Algorithms/ShuffleArray";
 
 export default function Array() {
+    const [sortType, setSortType] = useState<string>("simple");
     const [shuffledArray, setShuffledArray] = useState<number[]>([
         3,
         6,
@@ -15,23 +16,46 @@ export default function Array() {
         4,
         10,
     ]);
-    const [sortType, setSortType] = useState<string>("simple");
+    const arrayRef = useRef<number[]>([]);
+    arrayRef.current = shuffledArray;
 
-    const chartData = {
-        labels: shuffledArray,
+    const [chartData, setChartData] = useState<object>({
+        labels: arrayRef.current,
         datasets: [
             {
                 label: "value",
-                data: shuffledArray,
+                data: arrayRef.current,
                 backgroundColor: "#377E86",
             },
         ],
-    };
+    });
 
-    useEffect(() => {
-        chartData.labels = shuffledArray;
-        chartData.datasets[0].data = shuffledArray;
-    }, [shuffledArray]);
+    function reverseArray() {
+        const newArray: number[] = shuffledArray;
+        console.log("before", newArray);
+
+        let firstIdx: number = 0;
+        let lastIdx: number = newArray.length - 1;
+        while (firstIdx < lastIdx) {
+            let temp = newArray[firstIdx];
+            newArray[firstIdx] = newArray[lastIdx];
+            newArray[lastIdx] = temp;
+            firstIdx++;
+            lastIdx--;
+        }
+
+        setChartData({
+            labels: newArray,
+            datasets: [
+                {
+                    label: "value",
+                    data: newArray,
+                    backgroundColor: "#377E86",
+                },
+            ],
+        });
+        setShuffledArray(newArray);
+    }
 
     function changeSize(size: number) {
         const newArray: number[] = [];
@@ -39,27 +63,6 @@ export default function Array() {
             newArray.push(i);
         }
         setShuffledArray(shuffleArray(newArray));
-    }
-
-    async function reverseArray() {
-        const newArray: number[] = shuffledArray;
-        let firstIdx = 0;
-        let lastIdx = newArray.length - 1;
-        while (firstIdx < lastIdx) {
-            await new Promise((resolve: any) =>
-                setTimeout(async function () {
-                    let temp = newArray[firstIdx];
-                    newArray[firstIdx] = newArray[lastIdx];
-                    newArray[lastIdx] = temp;
-                    firstIdx++;
-                    lastIdx--;
-                    setShuffledArray(newArray);
-                    console.log(chartData);
-                    resolve();
-                }, 300)
-            );
-            setShuffledArray(newArray);
-        }
     }
 
     function buttonClass(type: string) {

@@ -55,3 +55,24 @@
     color: #313131;
     text-decoration: none;
 }
+
+@keyframes jump-up {
+    50% {
+        transform: translate(0, 10px);
+    }
+}
+
+.dot1 {
+    background-color: #306d74;
+    animation: jump-up 0.8s 0.1s linear infinite;
+}
+
+.dot2 {
+    background-color: #6C757D;
+    animation: jump-up 0.8s 0.2s linear infinite;
+}
+
+.dot3 {
+    background-color: #5bcedb;
+    animation: jump-up 0.8s 0.3s linear infinite;
+}

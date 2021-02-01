@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function Footer() {
     return (
         <footer
@@ -9,7 +7,11 @@ export default function Footer() {
                 className="footer-copyright text-center py-2"
                 style={{ fontSize: 20 }}>
                 © 2021 Copyright:
-                <a className="footer-link" href="https://www.brianbastanza.me">
+                <a
+                    className="footer-link"
+                    href="https://www.brianbastanza.me"
+                    target="_blank"
+                    rel="noreferrer noopener">
                     {" "}
                     brianbastanza.me
                 </a>

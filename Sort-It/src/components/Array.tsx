@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
+import DotAnimation from "./DotAnimation";
 import {
     shuffleArray,
     initialArray as initArray,
@@ -8,21 +9,25 @@ import { calculateTimeDelay } from "../helpers/calculateTimeDelay";
 import { buttonClass } from "../helpers/buttonClass";
 import { bubbleswap } from "../helpers/bubbleswap";
 
+interface ChartData {
+    labels: number[];
+    datasets: object[];
+}
+
 export default function Array() {
     const [isSorting, setIsSorting] = useState<boolean>(false);
-    const [sortType, setSortType] = useState<string>("simple");
-    const initialArray = initArray;
-    const [dataArray, setDataArray] = useState<number[]>(
-        shuffleArray(initialArray)
-    );
+    const [sortType, setSortType] = useState<string>("bubble");
+    const initialArray = shuffleArray(initArray);
+    const [dataArray, setDataArray] = useState<number[]>(initialArray);
 
-    const [chartData, setChartData] = useState<object>({
-        labels: dataArray,
+    const [chartData, setChartData] = useState<ChartData>({
+        labels: initialArray,
         datasets: [
             {
                 label: "value",
-                data: dataArray,
+                data: initialArray,
                 backgroundColor: "#377E86",
+                borderColor: "#313131",
             },
         ],
     });
@@ -38,6 +43,7 @@ export default function Array() {
                     label: "value",
                     data: arrayRef.current,
                     backgroundColor: "#377E86",
+                    borderColor: "#313131",
                 },
             ],
         });
@@ -67,6 +73,48 @@ export default function Array() {
         setIsSorting(false);
     }
 
+    async function insertionSort() {
+        setIsSorting(true);
+        const newArray: number[] = dataArray;
+        for (let i = 1; i < newArray.length; i++) {
+            let current: number = newArray[i];
+            let j: number = i - 1;
+
+            while (j >= 0 && newArray[j] > current)
+                // eslint-disable-next-line
+                await new Promise((resolve: any) =>
+                    setTimeout(function () {
+                        newArray[j + 1] = newArray[j];
+                        j--;
+                        newArray[j + 1] = current;
+                        resolve();
+                    }, calculateTimeDelay(dataArray.length))
+                );
+            setDataArray([...newArray]);
+        }
+        setIsSorting(false);
+    }
+
+    function sortArray() {
+        switch (sortType) {
+            case "bubble":
+                bubbleSort();
+                break;
+            case "insertion":
+                insertionSort();
+                break;
+            case "merge":
+                // mergeSort();
+                break;
+            case "quick":
+                // quickSort();
+                break;
+            default:
+                // selectionSort();
+                break;
+        }
+    }
+
     function changeSize(size: number) {
         const newArray: number[] = [];
         for (let i = 1; i <= size; i++) {
@@ -77,7 +125,7 @@ export default function Array() {
 
     return (
         <div style={{ marginTop: 20 }}>
-            <h2 style={{ textTransform: "capitalize"}}>{sortType} Sort</h2>
+            <h2 style={{ textTransform: "capitalize" }}>{sortType} Sort</h2>
             <div
                 style={{
                     width: "70vw",
@@ -96,10 +144,15 @@ export default function Array() {
             </div>
             {!isSorting ? (
                 <>
-                    <div style={{ margin: "15px 0 10px", display: "flex", justifyContent: "center" }}>
+                    <div
+                        style={{
+                            margin: "15px 0 0",
+                            display: "flex",
+                            justifyContent: "center",
+                        }}>
                         <button
                             className={"btn btn-lg btn-info sort-btn"}
-                            onClick={bubbleSort}>
+                            onClick={sortArray}>
                             Sort It!
                         </button>
                         <button
@@ -110,7 +163,7 @@ export default function Array() {
                             Shuffle Array
                         </button>
                     </div>
-                    <h2>Array Size</h2>
+                    <h3>Array Size</h3>
                     <input
                         type="range"
                         min="25"
@@ -121,18 +174,17 @@ export default function Array() {
                         onChange={(e) => changeSize(parseInt(e.target.value))}
                         style={{ width: "20vw" }}
                     />
-                    <br />
-                    <br />
+                    <hr />
                     <div style={{ display: "flex", justifyContent: "center" }}>
-                        <button
-                            className={buttonClass("simple", sortType)}
-                            onClick={() => setSortType("simple")}>
-                            Simple Sort
-                        </button>
                         <button
                             className={buttonClass("bubble", sortType)}
                             onClick={() => setSortType("bubble")}>
                             Bubble Sort
+                        </button>
+                        <button
+                            className={buttonClass("insertion", sortType)}
+                            onClick={() => setSortType("insertion")}>
+                            Insertion Sort
                         </button>
                         <button
                             name="selection"
@@ -152,7 +204,9 @@ export default function Array() {
                         </button>
                     </div>
                 </>
-            ) : null}
+            ) : (
+                <DotAnimation />
+            )}
         </div>
     );
 }

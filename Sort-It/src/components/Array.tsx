@@ -52,7 +52,12 @@ export default function Array() {
 
                 for (let j = 1; j < dataArray.length - i; j++) {
                     if (dataArray[j] < dataArray[j - 1]) {
-                        const updatedArray = await bubbleswap(dataArray, j, j - 1, calculateTimeDelay(dataArray.length));
+                        const updatedArray = await bubbleswap(
+                            dataArray,
+                            j,
+                            j - 1,
+                            calculateTimeDelay(dataArray.length)
+                        );
                         setDataArray([...updatedArray]);
                         isSorted = false;
                     }
@@ -72,7 +77,7 @@ export default function Array() {
 
     return (
         <div style={{ marginTop: 20 }}>
-            <h2 style={{ textTransform: "capitalize" }}>{sortType} Sort</h2>
+            <h2 style={{ textTransform: "capitalize"}}>{sortType} Sort</h2>
             <div
                 style={{
                     width: "70vw",
@@ -91,11 +96,18 @@ export default function Array() {
             </div>
             {!isSorting ? (
                 <>
-                    <div style={{ margin: "15px 0 10px" }}>
+                    <div style={{ margin: "15px 0 10px", display: "flex", justifyContent: "center" }}>
                         <button
-                            className={"btn btn-lg btn-primary"}
-                            onClick={() => bubbleSort()}>
+                            className={"btn btn-lg btn-info sort-btn"}
+                            onClick={bubbleSort}>
                             Sort It!
+                        </button>
+                        <button
+                            className={"btn btn-secondary sort-btn"}
+                            onClick={() =>
+                                setDataArray([...shuffleArray(dataArray)])
+                            }>
+                            Shuffle Array
                         </button>
                     </div>
                     <h2>Array Size</h2>

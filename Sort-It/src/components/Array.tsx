@@ -1,21 +1,21 @@
 import { useState, useRef, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
-import { shuffleArray } from "../Algorithms/shuffleArray";
+import {
+    shuffleArray,
+    initialArray as initArray,
+} from "../Algorithms/shuffleArray";
+import { calculateTimeDelay } from "../helpers/calculateTimeDelay";
+import { buttonClass } from "../helpers/buttonClass";
+import { bubbleswap } from "../helpers/bubbleswap";
 
 export default function Array() {
+    const [isSorting, setIsSorting] = useState<boolean>(false);
     const [sortType, setSortType] = useState<string>("simple");
-    const [dataArray, setDataArray] = useState<number[]>([
-        3,
-        6,
-        2,
-        7,
-        8,
-        5,
-        1,
-        9,
-        4,
-        10,
-    ]);
+    const initialArray = initArray;
+    const [dataArray, setDataArray] = useState<number[]>(
+        shuffleArray(initialArray)
+    );
+
     const [chartData, setChartData] = useState<object>({
         labels: dataArray,
         datasets: [
@@ -26,12 +26,11 @@ export default function Array() {
             },
         ],
     });
+
     const arrayRef = useRef<number[]>([]);
     arrayRef.current = dataArray;
 
-    // TODO get useEffect to fire
     useEffect(() => {
-        console.log("useEffect fired");
         setChartData({
             labels: arrayRef.current,
             datasets: [
@@ -44,9 +43,23 @@ export default function Array() {
         });
     }, [dataArray]);
 
-    function reverseArray() {
-        const newArray: number[] = dataArray;
-        setDataArray([...newArray.reverse()]);
+    async function bubbleSort() {
+        setIsSorting(true);
+        let isSorted: boolean = false;
+        while (!isSorted) {
+            for (let i = 0; i < dataArray.length; i++) {
+                isSorted = true;
+
+                for (let j = 1; j < dataArray.length - i; j++) {
+                    if (dataArray[j] < dataArray[j - 1]) {
+                        const updatedArray = await bubbleswap(dataArray, j, j - 1, calculateTimeDelay(dataArray.length));
+                        setDataArray([...updatedArray]);
+                        isSorted = false;
+                    }
+                }
+            }
+        }
+        setIsSorting(false);
     }
 
     function changeSize(size: number) {
@@ -57,17 +70,9 @@ export default function Array() {
         setDataArray([...shuffleArray(newArray)]);
     }
 
-    function buttonClass(type: string) {
-        return type === sortType ? "btn btn-primary" : "btn btn-info";
-    }
-
-    const chartOptions = {
-        title: { display: true, text: sortType, fontSize: 25 },
-        maintainAspectRatio: false,
-    };
-
     return (
-        <div>
+        <div style={{ marginTop: 20 }}>
+            <h2 style={{ textTransform: "capitalize" }}>{sortType} Sort</h2>
             <div
                 style={{
                     width: "70vw",
@@ -76,62 +81,66 @@ export default function Array() {
                     justifyContent: "center",
                     margin: "auto",
                 }}>
-                <Bar data={chartData} options={chartOptions} />
+                <Bar
+                    data={chartData}
+                    options={{
+                        maintainAspectRatio: false,
+                        animation: false,
+                    }}
+                />
             </div>
-            <br />
-            <h2>Array Size</h2>
-            <input
-                type="range"
-                min="10"
-                max="310"
-                step="25"
-                value={dataArray.length}
-                className="slider"
-                onChange={(e) => changeSize(parseInt(e.target.value))}
-            />
-            <br />
-            <br />
-            <h2 style={{ textTransform: "capitalize" }}>{sortType} Sort</h2>
-            <div style={{ display: "flex", justifyContent: "center" }}>
-                <button
-                    className={buttonClass("simple")}
-                    onClick={() => setSortType("simple")}>
-                    Simple Sort
-                </button>
-                <button
-                    className={buttonClass("bubble")}
-                    onClick={() => setSortType("bubble")}>
-                    Bubble Sort
-                </button>
-                <button
-                    className={buttonClass("selection")}
-                    onClick={() => setSortType("selection")}>
-                    Selection Sort
-                </button>
-                <button
-                    className={buttonClass("merge")}
-                    onClick={() => setSortType("merge")}>
-                    Merge Sort
-                </button>
-                <button
-                    className={buttonClass("quick")}
-                    onClick={() => setSortType("quick")}>
-                    Quick Sort
-                </button>
-            </div>
-            <button onClick={() => reverseArray()}>click me!</button>
-            <button onClick={() => console.log(dataArray)}>
-                click me!
-            </button>
+            {!isSorting ? (
+                <>
+                    <div style={{ margin: "15px 0 10px" }}>
+                        <button
+                            className={"btn btn-lg btn-primary"}
+                            onClick={() => bubbleSort()}>
+                            Sort It!
+                        </button>
+                    </div>
+                    <h2>Array Size</h2>
+                    <input
+                        type="range"
+                        min="25"
+                        max="125"
+                        step="20"
+                        value={dataArray.length}
+                        className="slider"
+                        onChange={(e) => changeSize(parseInt(e.target.value))}
+                        style={{ width: "20vw" }}
+                    />
+                    <br />
+                    <br />
+                    <div style={{ display: "flex", justifyContent: "center" }}>
+                        <button
+                            className={buttonClass("simple", sortType)}
+                            onClick={() => setSortType("simple")}>
+                            Simple Sort
+                        </button>
+                        <button
+                            className={buttonClass("bubble", sortType)}
+                            onClick={() => setSortType("bubble")}>
+                            Bubble Sort
+                        </button>
+                        <button
+                            name="selection"
+                            className={buttonClass("selection", sortType)}
+                            onClick={() => setSortType("selection")}>
+                            Selection Sort
+                        </button>
+                        <button
+                            className={buttonClass("merge", sortType)}
+                            onClick={() => setSortType("merge")}>
+                            Merge Sort
+                        </button>
+                        <button
+                            className={buttonClass("quick", sortType)}
+                            onClick={() => setSortType("quick")}>
+                            Quick Sort
+                        </button>
+                    </div>
+                </>
+            ) : null}
         </div>
     );
 }
-// let firstIdx: number = 0;
-// let lastIdx: number = newArray.length - 1;
-// while (firstIdx < lastIdx) {
-//     let temp = newArray[firstIdx];
-//     newArray[firstIdx] = newArray[lastIdx];
-//     newArray[lastIdx] = temp;
-//     firstIdx++;
-//     lastIdx--;
-// }

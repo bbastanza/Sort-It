@@ -2,18 +2,14 @@
 
 > A fun, interactive visual representation of popular sorting algorithms.
 
-<hr/>
-
-## In Development
-
-<hr/>
+## Currently In Development
 
 ![typescript-react](MDimages/typescript-react.png)
 ![screenshot](MDimages/screenshot.png)
 
-## Author
+### Author
 
-### Brian Bastanza- Full Stack Web Developer
+#### Brian Bastanza- Full Stack Web Developer
 
 <a href="https://www.brianbastanza.me/" target="_blank" rel="noopener">Personal Website</a>
 

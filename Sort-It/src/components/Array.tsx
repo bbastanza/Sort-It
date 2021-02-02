@@ -10,10 +10,6 @@ import { buttonClass } from "../helpers/buttonClass";
 import { bubbleswap } from "../helpers/bubbleswap";
 import { ChartData } from "../helpers/interfaces";
 
-enum SortingTypes{
-    "bubble", "insertion", "selection", "merge", "quick"
-}
-
 export default function Array() {
     const [isSorting, setIsSorting] = useState<boolean>(false);
     const [sortType, setSortType] = useState<string>("bubble");
@@ -111,7 +107,6 @@ export default function Array() {
                 break;
             default:
                 // selectionSort();
-                break;
         }
     }
 

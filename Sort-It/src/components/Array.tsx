@@ -15,7 +15,8 @@ export default function Array() {
     const [sortType, setSortType] = useState<string>("bubble");
     const initialArray = shuffleArray(initArray);
     const [dataArray, setDataArray] = useState<number[]>(initialArray);
-
+    const [currentValue, setCurrentValue] = useState<number>(0);
+    const [compareValue, setCompareValue] = useState<number>(0);
     const [chartData, setChartData] = useState<ChartData>({
         labels: initialArray,
         datasets: [
@@ -32,18 +33,29 @@ export default function Array() {
     arrayRef.current = dataArray;
 
     useEffect(() => {
+        let colors: any = [];
+
+        if (!isSorting) colors = "#377E86";
+        else {
+            for (const number of arrayRef.current) {
+                if (number === currentValue) colors.push("#FF7700");
+                else if (number === compareValue) colors.push("#ff8686");
+                else colors.push("#377E86");
+            }
+        }
+
         setChartData({
             labels: arrayRef.current,
             datasets: [
                 {
                     label: "value",
                     data: arrayRef.current,
-                    backgroundColor: "#377E86",
+                    backgroundColor: colors,
                     borderColor: "#313131",
                 },
             ],
         });
-    }, [dataArray]);
+    }, [dataArray, isSorting]);
 
     async function bubbleSort() {
         setIsSorting(true);
@@ -60,33 +72,68 @@ export default function Array() {
                             j - 1,
                             calculateTimeDelay(dataArray.length)
                         );
+                        setCompareValue(dataArray[j + 1]);
+                        setCurrentValue(dataArray[j]);
                         setDataArray([...updatedArray]);
                         isSorted = false;
                     }
                 }
             }
         }
+        setCurrentValue(0);
         setIsSorting(false);
     }
 
     async function insertionSort() {
         setIsSorting(true);
-        const newArray: number[] = dataArray;
-        for (let i = 1; i < newArray.length; i++) {
-            let current: number = newArray[i];
+        // const newArray: number[] = dataArray;
+        for (let i = 1; i < dataArray.length; i++) {
+            let current: number = dataArray[i];
             let j: number = i - 1;
+            setCurrentValue(current);
+            setCompareValue(dataArray[i + 1]);
 
-            while (j >= 0 && newArray[j] > current)
+            while (j >= 0 && dataArray[j] > current)
                 // eslint-disable-next-line
                 await new Promise((resolve: any) =>
                     setTimeout(function () {
-                        newArray[j + 1] = newArray[j];
+                        dataArray[j + 1] = dataArray[j];
                         j--;
-                        newArray[j + 1] = current;
+                        dataArray[j + 1] = current;
                         resolve();
                     }, calculateTimeDelay(dataArray.length))
                 );
-            setDataArray([...newArray]);
+            setDataArray([...dataArray]);
+        }
+        setIsSorting(false);
+    }
+
+    async function selectionSort() {
+        setIsSorting(true);
+        const length: number = dataArray.length;
+        setCurrentValue(0);
+        setCompareValue(1);
+        for (let i = 0; i < length; i++) {
+            let minimumIdx = i;
+            for (let j = i + 1; j < length; j++) {
+                // eslint-disable-next-line
+                await new Promise((resolve: any) =>
+                    setTimeout(function () {
+                        if (dataArray[j] < dataArray[minimumIdx]) {
+                            minimumIdx = j;
+                        }
+                        resolve();
+                    }, calculateTimeDelay(dataArray.length))
+                );
+                setCurrentValue(dataArray[minimumIdx]);
+                setCompareValue(dataArray[minimumIdx] + 1);
+            }
+            if (minimumIdx !== i) {
+                const temp = dataArray[minimumIdx];
+                dataArray[minimumIdx] = dataArray[i];
+                dataArray[i] = temp;
+            }
+            setDataArray([...dataArray]);
         }
         setIsSorting(false);
     }
@@ -106,7 +153,7 @@ export default function Array() {
                 // quickSort();
                 break;
             default:
-                // selectionSort();
+                selectionSort();
         }
     }
 
@@ -134,6 +181,9 @@ export default function Array() {
                     options={{
                         maintainAspectRatio: false,
                         animation: false,
+                        legend: {
+                            display: false,
+                        },
                     }}
                 />
             </div>

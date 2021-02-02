@@ -8,7 +8,7 @@ export function calculateTimeDelay(length: number) {
             timeDelay = 40;
             break;
         case length <= 65:
-            timeDelay = 20;
+            timeDelay = 15;
             break;
         case length <= 85:
             timeDelay = 2;

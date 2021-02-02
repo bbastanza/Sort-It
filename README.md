@@ -8,6 +8,9 @@
 
 <hr/>
 
+![typescript-react](MDimages/typescript-react.png)
+![screenshot](MDimages/screenshot.png)
+
 ## Author
 
 ### Brian Bastanza- Full Stack Web Developer

@@ -8,10 +8,10 @@ import {
 import { calculateTimeDelay } from "../helpers/calculateTimeDelay";
 import { buttonClass } from "../helpers/buttonClass";
 import { bubbleswap } from "../helpers/bubbleswap";
+import { ChartData } from "../helpers/interfaces";
 
-interface ChartData {
-    labels: number[];
-    datasets: object[];
+enum SortingTypes{
+    "bubble", "insertion", "selection", "merge", "quick"
 }
 
 export default function Array() {

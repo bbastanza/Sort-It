@@ -1,4 +1,4 @@
-export function calculateTimeDelay(length: number) {
+export function calculateTimeDelay(length: number): number {
     let timeDelay: number;
     switch (true) {
         case length <= 25:

@@ -1,4 +1,3 @@
-
 export interface IChartData {
     labels: number[];
     datasets: IDataSets[];

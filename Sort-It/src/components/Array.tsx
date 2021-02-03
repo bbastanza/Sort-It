@@ -17,8 +17,8 @@ export default function Array() {
     const [sortType, setSortType] = useState<string>("bubble");
     const [canSort, setCanSort] = useState<boolean>(true);
     const [dataArray, setDataArray] = useState<number[]>(initialArray);
-    const [currentValue, setCurrentValue] = useState<number>(0);
-    const [compareValue, setCompareValue] = useState<number>(0);
+    const orangeValueRef = useRef<number>(0);
+    const pinkValueRef = useRef<number>(0);
     const [chartData, setChartData] = useState<IChartData>({
         labels: initialArray,
         datasets: [
@@ -34,13 +34,14 @@ export default function Array() {
     const arrayRef = useRef<number[]>([]);
     arrayRef.current = dataArray;
 
-    useEffect(() => {
+    useEffect((): void => {
         let colors: any = [];
         if (!isSorting) colors = "#377E86";
         else {
             for (const number of arrayRef.current) {
-                if (number === currentValue) colors.push("#FF7700");
-                else if (number === compareValue) colors.push("#ff8686");
+                if (number === orangeValueRef.current) colors.push("#FF7700");
+                else if (number === pinkValueRef.current)
+                    colors.push("#ff8686");
                 else colors.push("#377E86");
             }
         }
@@ -56,11 +57,9 @@ export default function Array() {
                 },
             ],
         });
-        // TODO fix linting issue HINT useRef
-        // eslint-disable-next-line
     }, [dataArray, isSorting]);
 
-    async function bubbleSort() {
+    async function bubbleSort(): Promise<void> {
         setCanSort(false);
         setIsSorting(true);
         let isSorted: boolean = false;
@@ -76,62 +75,57 @@ export default function Array() {
                             j - 1,
                             calculateTimeDelay(dataArray.length)
                         );
-                        setCompareValue(dataArray[j + 1]);
-                        setCurrentValue(dataArray[j]);
+                        pinkValueRef.current = dataArray[j + 1];
+                        orangeValueRef.current = dataArray[j];
                         setDataArray([...updatedArray]);
                         isSorted = false;
                     }
                 }
             }
         }
-        setCurrentValue(0);
+        pinkValueRef.current = 0;
         setIsSorting(false);
     }
 
-    async function insertionSort() {
+    async function insertionSort(): Promise<void> {
         setCanSort(false);
         setIsSorting(true);
-        setCurrentValue(0);
+        orangeValueRef.current = 0;
         for (let i = 1; i < dataArray.length; i++) {
             let current: number = dataArray[i];
             let j: number = i - 1;
-            while (j >= 0 && dataArray[j] > current)
-                // eslint-disable-next-line
+            while (j >= 0 && dataArray[j] > current) {
                 await new Promise((resolve: any) =>
-                    setTimeout(function () {
-                        dataArray[j + 1] = dataArray[j];
-                        j--;
-                        dataArray[j + 1] = current;
-                        setCompareValue(dataArray[j]);
-                        setCurrentValue(dataArray[j + 1]);
-                        setDataArray([...dataArray]);
-                        resolve();
-                    }, calculateTimeDelay(dataArray.length))
+                    setTimeout(resolve, calculateTimeDelay(dataArray.length))
                 );
+                dataArray[j + 1] = dataArray[j];
+                j--;
+                dataArray[j + 1] = current;
+                pinkValueRef.current = dataArray[j];
+                orangeValueRef.current = dataArray[j + 1];
+                setDataArray([...dataArray]);
+            }
         }
         setDataArray([...dataArray]);
         setIsSorting(false);
     }
 
-    async function selectionSort() {
+    async function selectionSort(): Promise<void> {
         setCanSort(false);
         setIsSorting(true);
-        setCompareValue(1);
-        setCurrentValue(0);
+        pinkValueRef.current = 1;
+        orangeValueRef.current = 0;
         for (let i = 0; i < dataArray.length; i++) {
             let minimumIdx = i;
             for (let j = i + 1; j < dataArray.length; j++) {
-                // eslint-disable-next-line
                 await new Promise((resolve: any) =>
-                    setTimeout(function () {
-                        setCompareValue(dataArray[j]);
-                        if (dataArray[j] < dataArray[minimumIdx]) {
-                            minimumIdx = j;
-                            setCurrentValue(dataArray[minimumIdx]);
-                        }
-                        resolve();
-                    }, calculateTimeDelay(dataArray.length))
+                    setTimeout(resolve, calculateTimeDelay(dataArray.length))
                 );
+                pinkValueRef.current = dataArray[j];
+                if (dataArray[j] < dataArray[minimumIdx]) {
+                    minimumIdx = j;
+                    orangeValueRef.current = dataArray[minimumIdx];
+                }
                 setDataArray([...dataArray]);
             }
             if (minimumIdx !== i) {
@@ -143,8 +137,30 @@ export default function Array() {
         setDataArray([...dataArray]);
         setIsSorting(false);
     }
+    function runMergeSort(): void {
+        const newArray = mergeSort(dataArray);
+        setDataArray([...newArray]);
+    }
 
-    function sortArray() {
+    function mergeSort(array: any): any {
+        const half = array.length / 2;
+
+        if (array.length < 2) return array;
+
+        const left = array.splice(0, half);
+        return merge(mergeSort(left), mergeSort(array));
+    }
+
+    function merge(left: any, right: any): any {
+        const newArray: any = [];
+        while (!!left.length && !!right.length) {
+            if (left[0] < right[0]) newArray.push(left.shift());
+            else newArray.push(right.shift());
+        }
+        return [...newArray, ...left, ...right];
+    }
+
+    function sortArray(): void {
         if (canSort) {
             switch (sortType) {
                 case "bubble":
@@ -154,7 +170,7 @@ export default function Array() {
                     insertionSort();
                     break;
                 case "merge":
-                    // mergeSort();
+                    runMergeSort();
                     break;
                 case "quick":
                     // quickSort();

@@ -3,7 +3,7 @@ export async function bubbleswap(
     index1: number,
     index2: number,
     timeDelay: number
-) {
+): Promise<number[]> {
     await new Promise((resolve: any) =>
         setTimeout(async function () {
             const temp: number = array[index1];

@@ -1,6 +1,7 @@
 .App {
   text-align: center;
-  color: #313131
+  color: #313131;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .slider {

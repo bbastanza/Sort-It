@@ -4,20 +4,22 @@ import DotAnimation from "./DotAnimation";
 import {
     shuffleArray,
     initialArray as initArray,
-} from "../Algorithms/shuffleArray";
+} from "../helpers/shuffleArray";
 import { calculateTimeDelay } from "../helpers/calculateTimeDelay";
+import { changeSize } from "../helpers/changesize";
 import { buttonClass } from "../helpers/buttonClass";
 import { bubbleswap } from "../helpers/bubbleswap";
-import { ChartData } from "../helpers/interfaces";
+import { IChartData } from "../helpers/interfaces";
 
 export default function Array() {
+    const initialArray = shuffleArray(initArray);
     const [isSorting, setIsSorting] = useState<boolean>(false);
     const [sortType, setSortType] = useState<string>("bubble");
-    const initialArray = shuffleArray(initArray);
+    const [canSort, setCanSort] = useState<boolean>(true);
     const [dataArray, setDataArray] = useState<number[]>(initialArray);
     const [currentValue, setCurrentValue] = useState<number>(0);
     const [compareValue, setCompareValue] = useState<number>(0);
-    const [chartData, setChartData] = useState<ChartData>({
+    const [chartData, setChartData] = useState<IChartData>({
         labels: initialArray,
         datasets: [
             {
@@ -34,7 +36,6 @@ export default function Array() {
 
     useEffect(() => {
         let colors: any = [];
-
         if (!isSorting) colors = "#377E86";
         else {
             for (const number of arrayRef.current) {
@@ -55,9 +56,12 @@ export default function Array() {
                 },
             ],
         });
+        // TODO fix linting issue HINT useRef
+        // eslint-disable-next-line
     }, [dataArray, isSorting]);
 
     async function bubbleSort() {
+        setCanSort(false);
         setIsSorting(true);
         let isSorted: boolean = false;
         while (!isSorted) {
@@ -85,14 +89,12 @@ export default function Array() {
     }
 
     async function insertionSort() {
+        setCanSort(false);
         setIsSorting(true);
-        // const newArray: number[] = dataArray;
+        setCurrentValue(0);
         for (let i = 1; i < dataArray.length; i++) {
             let current: number = dataArray[i];
             let j: number = i - 1;
-            setCurrentValue(current);
-            setCompareValue(dataArray[i + 1]);
-
             while (j >= 0 && dataArray[j] > current)
                 // eslint-disable-next-line
                 await new Promise((resolve: any) =>
@@ -100,74 +102,71 @@ export default function Array() {
                         dataArray[j + 1] = dataArray[j];
                         j--;
                         dataArray[j + 1] = current;
+                        setCompareValue(dataArray[j]);
+                        setCurrentValue(dataArray[j + 1]);
+                        setDataArray([...dataArray]);
                         resolve();
                     }, calculateTimeDelay(dataArray.length))
                 );
-            setDataArray([...dataArray]);
         }
+        setDataArray([...dataArray]);
         setIsSorting(false);
     }
 
     async function selectionSort() {
+        setCanSort(false);
         setIsSorting(true);
-        const length: number = dataArray.length;
-        setCurrentValue(0);
         setCompareValue(1);
-        for (let i = 0; i < length; i++) {
+        setCurrentValue(0);
+        for (let i = 0; i < dataArray.length; i++) {
             let minimumIdx = i;
-            for (let j = i + 1; j < length; j++) {
+            for (let j = i + 1; j < dataArray.length; j++) {
                 // eslint-disable-next-line
                 await new Promise((resolve: any) =>
                     setTimeout(function () {
+                        setCompareValue(dataArray[j]);
                         if (dataArray[j] < dataArray[minimumIdx]) {
                             minimumIdx = j;
+                            setCurrentValue(dataArray[minimumIdx]);
                         }
                         resolve();
                     }, calculateTimeDelay(dataArray.length))
                 );
-                setCurrentValue(dataArray[minimumIdx]);
-                setCompareValue(dataArray[minimumIdx] + 1);
+                setDataArray([...dataArray]);
             }
             if (minimumIdx !== i) {
                 const temp = dataArray[minimumIdx];
                 dataArray[minimumIdx] = dataArray[i];
                 dataArray[i] = temp;
             }
-            setDataArray([...dataArray]);
         }
+        setDataArray([...dataArray]);
         setIsSorting(false);
     }
 
     function sortArray() {
-        switch (sortType) {
-            case "bubble":
-                bubbleSort();
-                break;
-            case "insertion":
-                insertionSort();
-                break;
-            case "merge":
-                // mergeSort();
-                break;
-            case "quick":
-                // quickSort();
-                break;
-            default:
-                selectionSort();
+        if (canSort) {
+            switch (sortType) {
+                case "bubble":
+                    bubbleSort();
+                    break;
+                case "insertion":
+                    insertionSort();
+                    break;
+                case "merge":
+                    // mergeSort();
+                    break;
+                case "quick":
+                    // quickSort();
+                    break;
+                default:
+                    selectionSort();
+            }
         }
-    }
-
-    function changeSize(size: number) {
-        const newArray: number[] = [];
-        for (let i = 1; i <= size; i++) {
-            newArray.push(i);
-        }
-        setDataArray([...shuffleArray(newArray)]);
     }
 
     return (
         <div style={{ marginTop: 20 }}>
-            <h2 style={{ textTransform: "capitalize" }}>{sortType} Sort</h2>
             <div
                 style={{
                     width: "70vw",
@@ -189,22 +188,29 @@ export default function Array() {
             </div>
             {!isSorting ? (
                 <>
+                    <h2 style={{ textTransform: "capitalize" }}>
+                        {sortType} Sort
+                    </h2>
                     <div
                         style={{
                             margin: "15px 0 0",
                             display: "flex",
                             justifyContent: "center",
                         }}>
-                        <button
-                            className={"btn btn-lg btn-info sort-btn"}
-                            onClick={sortArray}>
-                            Sort It!
-                        </button>
+                        {canSort ? (
+                            <button
+                                className={"btn btn-lg btn-info sort-btn"}
+                                onClick={sortArray}>
+                                Sort It!
+                            </button>
+                        ) : null}
                         <button
                             className={"btn btn-secondary sort-btn"}
-                            onClick={() =>
-                                setDataArray([...shuffleArray(dataArray)])
-                            }>
+                            onClick={() => {
+                                setCanSort(true);
+                                const newArray = shuffleArray(dataArray);
+                                setDataArray([...newArray]);
+                            }}>
                             Shuffle Array
                         </button>
                     </div>
@@ -216,7 +222,12 @@ export default function Array() {
                         step="20"
                         value={dataArray.length}
                         className="slider"
-                        onChange={(e) => changeSize(parseInt(e.target.value))}
+                        onChange={(e) => {
+                            setCanSort(true);
+                            setDataArray([
+                                ...changeSize(parseInt(e.target.value)),
+                            ]);
+                        }}
                         style={{ width: "20vw" }}
                     />
                     <hr />

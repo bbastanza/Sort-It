@@ -17,8 +17,10 @@ export default function Array() {
     const [sortType, setSortType] = useState<string>("bubble");
     const [canSort, setCanSort] = useState<boolean>(true);
     const [dataArray, setDataArray] = useState<number[]>(initialArray);
-    const orangeValueRef = useRef<number>(0);
-    const pinkValueRef = useRef<number>(0);
+    const orangeValueRef = useRef<number>(5);
+    const pinkValueRef = useRef<number>(10);
+    const arrayRef = useRef<number[]>(dataArray);
+    arrayRef.current = dataArray;
     const [chartData, setChartData] = useState<IChartData>({
         labels: initialArray,
         datasets: [
@@ -31,20 +33,16 @@ export default function Array() {
         ],
     });
 
-    const arrayRef = useRef<number[]>([]);
-    arrayRef.current = dataArray;
-
     useEffect((): void => {
         let colors: any = [];
-        if (!isSorting) colors = "#377E86";
-        else {
+        if (isSorting) {
             for (const number of arrayRef.current) {
                 if (number === orangeValueRef.current) colors.push("#FF7700");
                 else if (number === pinkValueRef.current)
                     colors.push("#ff8686");
                 else colors.push("#377E86");
             }
-        }
+        } else colors = "#377E86";
 
         setChartData({
             labels: arrayRef.current,
@@ -59,6 +57,22 @@ export default function Array() {
         });
     }, [dataArray, isSorting]);
 
+    async function updateAndPause(
+        pinkValue: number,
+        orangeValue: number
+    ): Promise<void> {
+        await new Promise((resolve: any) =>
+            setTimeout(resolve, calculateTimeDelay(dataArray.length, sortType))
+        );
+        const tempArray: number[] = [];
+        for (const number of dataArray) {
+            if (!!number) tempArray.push(number);
+        }
+        pinkValueRef.current = pinkValue;
+        orangeValueRef.current = orangeValue;
+        setDataArray([...tempArray]);
+    }
+
     async function bubbleSort(): Promise<void> {
         setCanSort(false);
         setIsSorting(true);
@@ -66,24 +80,15 @@ export default function Array() {
         while (!isSorted) {
             for (let i = 0; i < dataArray.length; i++) {
                 isSorted = true;
-
                 for (let j = 1; j < dataArray.length - i; j++) {
+                    await updateAndPause(dataArray[j], dataArray[j - 1]);
                     if (dataArray[j] < dataArray[j - 1]) {
-                        const updatedArray = await bubbleswap(
-                            dataArray,
-                            j,
-                            j - 1,
-                            calculateTimeDelay(dataArray.length)
-                        );
-                        pinkValueRef.current = dataArray[j + 1];
-                        orangeValueRef.current = dataArray[j];
-                        setDataArray([...updatedArray]);
+                        bubbleswap(dataArray, j, j - 1);
                         isSorted = false;
                     }
                 }
             }
         }
-        pinkValueRef.current = 0;
         setIsSorting(false);
     }
 
@@ -95,15 +100,10 @@ export default function Array() {
             let current: number = dataArray[i];
             let j: number = i - 1;
             while (j >= 0 && dataArray[j] > current) {
-                await new Promise((resolve: any) =>
-                    setTimeout(resolve, calculateTimeDelay(dataArray.length))
-                );
                 dataArray[j + 1] = dataArray[j];
                 j--;
                 dataArray[j + 1] = current;
-                pinkValueRef.current = dataArray[j];
-                orangeValueRef.current = dataArray[j + 1];
-                setDataArray([...dataArray]);
+                await updateAndPause(dataArray[j], dataArray[j + 1]);
             }
         }
         setDataArray([...dataArray]);
@@ -113,20 +113,13 @@ export default function Array() {
     async function selectionSort(): Promise<void> {
         setCanSort(false);
         setIsSorting(true);
-        pinkValueRef.current = 1;
-        orangeValueRef.current = 0;
         for (let i = 0; i < dataArray.length; i++) {
             let minimumIdx = i;
             for (let j = i + 1; j < dataArray.length; j++) {
-                await new Promise((resolve: any) =>
-                    setTimeout(resolve, calculateTimeDelay(dataArray.length))
-                );
-                pinkValueRef.current = dataArray[j];
                 if (dataArray[j] < dataArray[minimumIdx]) {
                     minimumIdx = j;
-                    orangeValueRef.current = dataArray[minimumIdx];
                 }
-                setDataArray([...dataArray]);
+                await updateAndPause(dataArray[j], dataArray[minimumIdx]);
             }
             if (minimumIdx !== i) {
                 const temp = dataArray[minimumIdx];
@@ -137,27 +130,83 @@ export default function Array() {
         setDataArray([...dataArray]);
         setIsSorting(false);
     }
-    function runMergeSort(): void {
-        const newArray = mergeSort(dataArray);
-        setDataArray([...newArray]);
-    }
 
-    function mergeSort(array: any): any {
-        const half = array.length / 2;
-
-        if (array.length < 2) return array;
-
-        const left = array.splice(0, half);
-        return merge(mergeSort(left), mergeSort(array));
-    }
-
-    function merge(left: any, right: any): any {
-        const newArray: any = [];
-        while (!!left.length && !!right.length) {
-            if (left[0] < right[0]) newArray.push(left.shift());
-            else newArray.push(right.shift());
+    async function mergeSort(): Promise<void> {
+        setCanSort(false);
+        setIsSorting(true);
+        const length: number = dataArray.length;
+        for (
+            let currentSize: number = 1;
+            currentSize <= length - 1;
+            currentSize = currentSize * 2
+        ) {
+            for (
+                let leftStart = 0;
+                leftStart < length - 1;
+                leftStart += currentSize * 2
+            ) {
+                const middle = leftStart + currentSize - 1;
+                const rightEnd = Math.min(
+                    leftStart + currentSize * 2 - 1,
+                    length - 1
+                );
+                await merge(dataArray, leftStart, middle, rightEnd);
+            }
         }
-        return [...newArray, ...left, ...right];
+        setIsSorting(false);
+        setCanSort(true);
+    }
+
+    async function merge(
+        array: number[],
+        left: number,
+        middle: number,
+        right: number
+    ): Promise<void> {
+        const firstNumber: number = middle - left + 1;
+        const secondNumber: number = right - middle;
+        let i: number;
+        let j: number;
+
+        const leftTempArray: number[] = [firstNumber];
+        const rightTempArray: number[] = [secondNumber];
+
+        for (i = 0; i < firstNumber; i++) {
+            leftTempArray[i] = array[left + i];
+            await updateAndPause(0, 0);
+        }
+        for (j = 0; j < secondNumber; j++) {
+            rightTempArray[j] = array[middle + 1 + j];
+            await updateAndPause(0, 0);
+        }
+
+        i = 0;
+        j = 0;
+        while (i < firstNumber && j < secondNumber) {
+            if (leftTempArray[i] <= rightTempArray[j]) {
+                array[left] = leftTempArray[i];
+                i++;
+                await updateAndPause(dataArray[left], rightTempArray[j]);
+            } else {
+                array[left] = rightTempArray[j];
+                j++;
+                await updateAndPause(dataArray[left], leftTempArray[i]);
+            }
+            left++;
+        }
+        while (i < firstNumber) {
+            array[left] = leftTempArray[i];
+            i++;
+            left++;
+            await updateAndPause(dataArray[left], 0);
+        }
+        await updateAndPause(0, 0);
+        while (j < secondNumber) {
+            array[left] = rightTempArray[j];
+            j++;
+            left++;
+            await updateAndPause(dataArray[left], 0);
+        }
     }
 
     function sortArray(): void {
@@ -170,7 +219,7 @@ export default function Array() {
                     insertionSort();
                     break;
                 case "merge":
-                    runMergeSort();
+                    mergeSort();
                     break;
                 case "quick":
                     // quickSort();
@@ -202,6 +251,7 @@ export default function Array() {
                     }}
                 />
             </div>
+            {/* TODO put all buttons in their own components}*/}
             {!isSorting ? (
                 <>
                     <h2 style={{ textTransform: "capitalize" }}>
@@ -281,4 +331,5 @@ export default function Array() {
             )}
         </div>
     );
+    // ***********
 }

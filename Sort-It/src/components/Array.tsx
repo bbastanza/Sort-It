@@ -12,21 +12,20 @@ import { bubbleswap } from "../helpers/bubbleswap";
 import { IChartData } from "../helpers/interfaces";
 
 export default function Array() {
-    const initialArray = shuffleArray(initArray);
     const [isSorting, setIsSorting] = useState<boolean>(false);
     const [sortType, setSortType] = useState<string>("bubble");
-    const [canSort, setCanSort] = useState<boolean>(true);
-    const [dataArray, setDataArray] = useState<number[]>(initialArray);
+    const [canSort, setCanSort] = useState<boolean>(false);
+    const [dataArray, setDataArray] = useState<number[]>(initArray);
     const orangeValueRef = useRef<number>(5);
     const pinkValueRef = useRef<number>(10);
     const arrayRef = useRef<number[]>(dataArray);
     arrayRef.current = dataArray;
     const [chartData, setChartData] = useState<IChartData>({
-        labels: initialArray,
+        labels: initArray,
         datasets: [
             {
                 label: "value",
-                data: initialArray,
+                data: initArray,
                 backgroundColor: "#377E86",
                 borderColor: "#313131",
             },
@@ -186,13 +185,12 @@ export default function Array() {
             if (leftTempArray[i] <= rightTempArray[j]) {
                 array[left] = leftTempArray[i];
                 i++;
-                await updateAndPause(dataArray[left], rightTempArray[j]);
             } else {
                 array[left] = rightTempArray[j];
                 j++;
-                await updateAndPause(dataArray[left], leftTempArray[i]);
             }
             left++;
+            await updateAndPause(array[left], 0);
         }
         while (i < firstNumber) {
             array[left] = leftTempArray[i];
@@ -241,6 +239,7 @@ export default function Array() {
                     margin: "auto",
                 }}>
                 <Bar
+                    redraw={true}
                     data={chartData}
                     options={{
                         maintainAspectRatio: false,
@@ -331,5 +330,4 @@ export default function Array() {
             )}
         </div>
     );
-    // ***********
 }

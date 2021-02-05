@@ -1,6 +1,6 @@
 export function calculateTimeDelay(length: number, sortType: string): number {
     let timeDelay: number;
-    if (sortType === "merge") timeDelay = 40;
+    if (sortType === "merge") timeDelay = 30;
     else {
         switch (true) {
             case length <= 25:

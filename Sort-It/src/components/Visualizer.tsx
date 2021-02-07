@@ -11,26 +11,29 @@ import { buttonClass } from "../helpers/buttonClass";
 import { bubbleswap } from "../helpers/bubbleswap";
 import { IChartData } from "../helpers/interfaces";
 
-export default function Array() {
+export default function Visualizer() {
+    const initialArray = shuffleArray(initArray);
     const [isSorting, setIsSorting] = useState<boolean>(false);
     const [sortType, setSortType] = useState<string>("bubble");
-    const [canSort, setCanSort] = useState<boolean>(false);
-    const [dataArray, setDataArray] = useState<number[]>(initArray);
+    const [canSort, setCanSort] = useState<boolean>(true);
+    const [dataArray, setDataArray] = useState<number[]>(initialArray);
     const orangeValueRef = useRef<number>(5);
     const pinkValueRef = useRef<number>(10);
     const arrayRef = useRef<number[]>(dataArray);
     arrayRef.current = dataArray;
     const [chartData, setChartData] = useState<IChartData>({
-        labels: initArray,
+        labels: initialArray,
         datasets: [
             {
                 label: "value",
-                data: initArray,
+                data: initialArray,
                 backgroundColor: "#377E86",
                 borderColor: "#313131",
             },
         ],
     });
+    // TODO should be in a ref so it only gets updated when the array size changes
+    const timeDelay: number = calculateTimeDelay(dataArray.length, sortType);
 
     useEffect((): void => {
         let colors: any = [];
@@ -60,9 +63,7 @@ export default function Array() {
         pinkValue: number,
         orangeValue: number
     ): Promise<void> {
-        await new Promise((resolve: any) =>
-            setTimeout(resolve, calculateTimeDelay(dataArray.length, sortType))
-        );
+        await new Promise((resolve: any) => setTimeout(resolve, timeDelay));
         const tempArray: number[] = [];
         for (const number of dataArray) {
             if (!!number) tempArray.push(number);
@@ -153,7 +154,6 @@ export default function Array() {
             }
         }
         setIsSorting(false);
-        setCanSort(true);
     }
 
     async function merge(
@@ -172,11 +172,9 @@ export default function Array() {
 
         for (i = 0; i < firstNumber; i++) {
             leftTempArray[i] = array[left + i];
-            await updateAndPause(0, 0);
         }
         for (j = 0; j < secondNumber; j++) {
             rightTempArray[j] = array[middle + 1 + j];
-            await updateAndPause(0, 0);
         }
 
         i = 0;
@@ -185,25 +183,26 @@ export default function Array() {
             if (leftTempArray[i] <= rightTempArray[j]) {
                 array[left] = leftTempArray[i];
                 i++;
+                await updateAndPause(array[left - 1], 0);
             } else {
                 array[left] = rightTempArray[j];
                 j++;
+                await updateAndPause(array[left - 1], 0);
             }
             left++;
-            await updateAndPause(array[left], 0);
         }
         while (i < firstNumber) {
             array[left] = leftTempArray[i];
             i++;
             left++;
-            await updateAndPause(dataArray[left], 0);
+            await updateAndPause(array[left - 1], 0);
         }
         await updateAndPause(0, 0);
         while (j < secondNumber) {
             array[left] = rightTempArray[j];
             j++;
             left++;
-            await updateAndPause(dataArray[left], 0);
+            await updateAndPause(array[left - 1], 0);
         }
     }
 
@@ -256,6 +255,7 @@ export default function Array() {
                     <h2 style={{ textTransform: "capitalize" }}>
                         {sortType} Sort
                     </h2>
+                    {/* TODO <ActionButtons sortArray={sortArray} setCanSort={setCanSort} dataArray={dataArray} setDataArray={setDataArray} /> */}
                     <div
                         style={{
                             margin: "15px 0 0",
@@ -273,18 +273,19 @@ export default function Array() {
                             className={"btn btn-secondary sort-btn"}
                             onClick={() => {
                                 setCanSort(true);
-                                const newArray = shuffleArray(dataArray);
-                                setDataArray([...newArray]);
+                                setDataArray([...shuffleArray(dataArray)]);
                             }}>
                             Shuffle Array
                         </button>
                     </div>
+                    {/* TODO <SizeSlider value={dataArray.length} setCanSort={setCanSort} setDataArray={setDataArray} /> */}
                     <h3>Array Size</h3>
                     <input
                         type="range"
                         min="25"
                         max="125"
                         step="20"
+                        /* value = {value} */
                         value={dataArray.length}
                         className="slider"
                         onChange={(e) => {
@@ -296,6 +297,7 @@ export default function Array() {
                         style={{ width: "20vw" }}
                     />
                     <hr />
+                    {/* TODO <SortTypes setSortType={setSortType} sortType={sortType} /> */}
                     <div style={{ display: "flex", justifyContent: "center" }}>
                         <button
                             className={buttonClass("bubble", sortType)}

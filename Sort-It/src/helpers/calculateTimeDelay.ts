@@ -3,19 +3,16 @@ export function calculateTimeDelay(length: number, sortType: string): number {
     if (sortType === "merge" || sortType === "quick") {
         switch (true) {
             case length <= 25:
-                timeDelay = 80;
+                timeDelay = 120;
                 break;
             case length <= 45:
-                timeDelay = 40;
+                timeDelay = 80;
                 break;
             case length <= 65:
-                timeDelay = 20;
-                break;
-            case length <= 85:
-                timeDelay = 5;
+                timeDelay = 60;
                 break;
             default:
-                timeDelay = 2;
+                timeDelay = 40;
                 break;
         }
     } else {
@@ -37,5 +34,6 @@ export function calculateTimeDelay(length: number, sortType: string): number {
                 break;
         }
     }
+    console.log(timeDelay)
     return timeDelay;
 }

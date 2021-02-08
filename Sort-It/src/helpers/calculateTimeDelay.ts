@@ -34,6 +34,5 @@ export function calculateTimeDelay(length: number, sortType: string): number {
                 break;
         }
     }
-    console.log(timeDelay)
     return timeDelay;
 }

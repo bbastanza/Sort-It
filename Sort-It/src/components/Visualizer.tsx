@@ -1,39 +1,33 @@
 import { useState, useRef, useEffect } from "react";
-import { Bar } from "react-chartjs-2";
-import DotAnimation from "./DotAnimation";
 import {
-    shuffleArray,
     initialArray as initArray,
-} from "../helpers/shuffleArray";
+    initialChartValue as initChart,
+} from "./../helpers/initialValues";
 import { calculateTimeDelay } from "../helpers/calculateTimeDelay";
-import { changeSize } from "../helpers/changesize";
-import { buttonClass } from "../helpers/buttonClass";
 import { bubbleswap } from "../helpers/bubbleswap";
 import { IChartData } from "../helpers/interfaces";
+import { delayUpdate } from "./../helpers/delayUpdate";
+import DotAnimation from "./DotAnimation";
+import SortTypeButtons from "./SortTypeButtons";
+import SizeSlider from "./SizeSlider";
+import ActionButtons from "./ActionButtons";
+import Chart from "./Chart";
 
 export default function Visualizer() {
-    const initialArray = shuffleArray(initArray);
     const [isSorting, setIsSorting] = useState<boolean>(false);
+    const [canSort, setCanSort] = useState<boolean>(false);
     const [sortType, setSortType] = useState<string>("bubble");
-    const [canSort, setCanSort] = useState<boolean>(true);
-    const [dataArray, setDataArray] = useState<number[]>(initialArray);
-    const orangeValueRef = useRef<number>(5);
-    const pinkValueRef = useRef<number>(10);
+    const [dataArray, setDataArray] = useState<number[]>(initArray);
+    const [chartData, setChartData] = useState<IChartData>(initChart);
+    const orangeValueRef = useRef<number>(0);
+    const pinkValueRef = useRef<number>(0);
+    const timeDelayRef = useRef<number>(80);
     const arrayRef = useRef<number[]>(dataArray);
     arrayRef.current = dataArray;
-    const [chartData, setChartData] = useState<IChartData>({
-        labels: initialArray,
-        datasets: [
-            {
-                label: "value",
-                data: initialArray,
-                backgroundColor: "#377E86",
-                borderColor: "#313131",
-            },
-        ],
-    });
-    // TODO should be in a ref so it only gets updated when the array size changes
-    const timeDelay: number = calculateTimeDelay(dataArray.length, sortType);
+
+    useEffect((): void => {
+        timeDelayRef.current = calculateTimeDelay(dataArray.length, sortType);
+    }, [dataArray.length, sortType]);
 
     useEffect((): void => {
         let colors: any = [];
@@ -44,7 +38,11 @@ export default function Visualizer() {
                     colors.push("#ff8686");
                 else colors.push("#377E86");
             }
-        } else colors = "#377E86";
+        } else {
+            orangeValueRef.current = 0;
+            pinkValueRef.current = 0;
+            colors = "#377E86";
+        }
 
         setChartData({
             labels: arrayRef.current,
@@ -53,35 +51,28 @@ export default function Visualizer() {
                     label: "value",
                     data: arrayRef.current,
                     backgroundColor: colors,
-                    borderColor: "#313131",
                 },
             ],
         });
     }, [dataArray, isSorting]);
 
-    async function updateAndPause(
+    async function updateVisualization(
         pinkValue: number,
-        orangeValue: number
+        orangeValue: number = 0
     ): Promise<void> {
-        await new Promise((resolve: any) => setTimeout(resolve, timeDelay));
-        const tempArray: number[] = [];
-        for (const number of dataArray) {
-            if (!!number) tempArray.push(number);
-        }
+        await delayUpdate(timeDelayRef.current);
         pinkValueRef.current = pinkValue;
         orangeValueRef.current = orangeValue;
-        setDataArray([...tempArray]);
+        setDataArray([...dataArray]);
     }
 
     async function bubbleSort(): Promise<void> {
-        setCanSort(false);
-        setIsSorting(true);
         let isSorted: boolean = false;
         while (!isSorted) {
             for (let i = 0; i < dataArray.length; i++) {
                 isSorted = true;
                 for (let j = 1; j < dataArray.length - i; j++) {
-                    await updateAndPause(dataArray[j], dataArray[j - 1]);
+                    await updateVisualization(dataArray[j], dataArray[j - 1]);
                     if (dataArray[j] < dataArray[j - 1]) {
                         bubbleswap(dataArray, j, j - 1);
                         isSorted = false;
@@ -89,12 +80,9 @@ export default function Visualizer() {
                 }
             }
         }
-        setIsSorting(false);
     }
 
     async function insertionSort(): Promise<void> {
-        setCanSort(false);
-        setIsSorting(true);
         orangeValueRef.current = 0;
         for (let i = 1; i < dataArray.length; i++) {
             let current: number = dataArray[i];
@@ -103,23 +91,20 @@ export default function Visualizer() {
                 dataArray[j + 1] = dataArray[j];
                 j--;
                 dataArray[j + 1] = current;
-                await updateAndPause(dataArray[j], dataArray[j + 1]);
+                await updateVisualization(dataArray[j], dataArray[j + 1]);
             }
         }
         setDataArray([...dataArray]);
-        setIsSorting(false);
     }
 
     async function selectionSort(): Promise<void> {
-        setCanSort(false);
-        setIsSorting(true);
         for (let i = 0; i < dataArray.length; i++) {
             let minimumIdx = i;
             for (let j = i + 1; j < dataArray.length; j++) {
                 if (dataArray[j] < dataArray[minimumIdx]) {
                     minimumIdx = j;
                 }
-                await updateAndPause(dataArray[j], dataArray[minimumIdx]);
+                await updateVisualization(dataArray[j], dataArray[minimumIdx]);
             }
             if (minimumIdx !== i) {
                 const temp = dataArray[minimumIdx];
@@ -128,12 +113,9 @@ export default function Visualizer() {
             }
         }
         setDataArray([...dataArray]);
-        setIsSorting(false);
     }
 
     async function mergeSort(): Promise<void> {
-        setCanSort(false);
-        setIsSorting(true);
         const length: number = dataArray.length;
         for (
             let currentSize: number = 1;
@@ -153,7 +135,6 @@ export default function Visualizer() {
                 await merge(dataArray, leftStart, middle, rightEnd);
             }
         }
-        setIsSorting(false);
     }
 
     async function merge(
@@ -181,151 +162,77 @@ export default function Visualizer() {
         j = 0;
         while (i < firstNumber && j < secondNumber) {
             if (leftTempArray[i] <= rightTempArray[j]) {
-                array[left] = leftTempArray[i];
+                if (!!leftTempArray[i]) array[left] = leftTempArray[i];
                 i++;
-                await updateAndPause(array[left - 1], 0);
+                await updateVisualization(array[left - 1]);
             } else {
-                array[left] = rightTempArray[j];
+                if (!!leftTempArray[i]) array[left] = rightTempArray[j];
                 j++;
-                await updateAndPause(array[left - 1], 0);
+                await updateVisualization(0, array[left - 1]);
             }
             left++;
         }
         while (i < firstNumber) {
-            array[left] = leftTempArray[i];
+            if (!!leftTempArray[i]) array[left] = leftTempArray[i];
             i++;
             left++;
-            await updateAndPause(array[left - 1], 0);
+            await updateVisualization(array[left - 1]);
         }
-        await updateAndPause(0, 0);
         while (j < secondNumber) {
-            array[left] = rightTempArray[j];
+            if (!!leftTempArray[i]) array[left] = rightTempArray[j];
             j++;
             left++;
-            await updateAndPause(array[left - 1], 0);
+            await updateVisualization(0, array[left - 1]);
         }
+        await updateVisualization(0);
     }
 
-    function sortArray(): void {
-        if (canSort) {
-            switch (sortType) {
-                case "bubble":
-                    bubbleSort();
-                    break;
-                case "insertion":
-                    insertionSort();
-                    break;
-                case "merge":
-                    mergeSort();
-                    break;
-                case "quick":
-                    // quickSort();
-                    break;
-                default:
-                    selectionSort();
-            }
+    async function quickSort() {}
+
+    async function performSort(): Promise<void> {
+        setCanSort(false);
+        setIsSorting(true);
+        switch (sortType) {
+            case "bubble":
+                await bubbleSort();
+                break;
+            case "insertion":
+                await insertionSort();
+                break;
+            case "merge":
+                await mergeSort();
+                break;
+            case "quick":
+                await quickSort();
+                break;
+            default:
+                await selectionSort();
         }
+        setIsSorting(false);
     }
 
     return (
         <div style={{ marginTop: 20 }}>
-            <div
-                style={{
-                    width: "70vw",
-                    height: "60vh",
-                    display: "flex",
-                    justifyContent: "center",
-                    margin: "auto",
-                }}>
-                <Bar
-                    redraw={true}
-                    data={chartData}
-                    options={{
-                        maintainAspectRatio: false,
-                        animation: false,
-                        legend: {
-                            display: false,
-                        },
-                    }}
-                />
-            </div>
-            {/* TODO put all buttons in their own components}*/}
+            <Chart data={chartData} />
+            <h2 style={{ textTransform: "capitalize" }}>{sortType} Sort</h2>
             {!isSorting ? (
                 <>
-                    <h2 style={{ textTransform: "capitalize" }}>
-                        {sortType} Sort
-                    </h2>
-                    {/* TODO <ActionButtons sortArray={sortArray} setCanSort={setCanSort} dataArray={dataArray} setDataArray={setDataArray} /> */}
-                    <div
-                        style={{
-                            margin: "15px 0 0",
-                            display: "flex",
-                            justifyContent: "center",
-                        }}>
-                        {canSort ? (
-                            <button
-                                className={"btn btn-lg btn-info sort-btn"}
-                                onClick={sortArray}>
-                                Sort It!
-                            </button>
-                        ) : null}
-                        <button
-                            className={"btn btn-secondary sort-btn"}
-                            onClick={() => {
-                                setCanSort(true);
-                                setDataArray([...shuffleArray(dataArray)]);
-                            }}>
-                            Shuffle Array
-                        </button>
-                    </div>
-                    {/* TODO <SizeSlider value={dataArray.length} setCanSort={setCanSort} setDataArray={setDataArray} /> */}
-                    <h3>Array Size</h3>
-                    <input
-                        type="range"
-                        min="25"
-                        max="125"
-                        step="20"
-                        /* value = {value} */
-                        value={dataArray.length}
-                        className="slider"
-                        onChange={(e) => {
-                            setCanSort(true);
-                            setDataArray([
-                                ...changeSize(parseInt(e.target.value)),
-                            ]);
-                        }}
-                        style={{ width: "20vw" }}
+                    <ActionButtons
+                        performSort={performSort}
+                        setCanSort={setCanSort}
+                        dataArray={dataArray}
+                        setDataArray={setDataArray}
+                        canSort={canSort}
                     />
-                    <hr />
-                    {/* TODO <SortTypes setSortType={setSortType} sortType={sortType} /> */}
-                    <div style={{ display: "flex", justifyContent: "center" }}>
-                        <button
-                            className={buttonClass("bubble", sortType)}
-                            onClick={() => setSortType("bubble")}>
-                            Bubble Sort
-                        </button>
-                        <button
-                            className={buttonClass("insertion", sortType)}
-                            onClick={() => setSortType("insertion")}>
-                            Insertion Sort
-                        </button>
-                        <button
-                            name="selection"
-                            className={buttonClass("selection", sortType)}
-                            onClick={() => setSortType("selection")}>
-                            Selection Sort
-                        </button>
-                        <button
-                            className={buttonClass("merge", sortType)}
-                            onClick={() => setSortType("merge")}>
-                            Merge Sort
-                        </button>
-                        <button
-                            className={buttonClass("quick", sortType)}
-                            onClick={() => setSortType("quick")}>
-                            Quick Sort
-                        </button>
-                    </div>
+                    <SizeSlider
+                        value={dataArray.length}
+                        setCanSort={setCanSort}
+                        setDataArray={setDataArray}
+                    />
+                    <SortTypeButtons
+                        setSortType={setSortType}
+                        sortType={sortType}
+                    />
                 </>
             ) : (
                 <DotAnimation />

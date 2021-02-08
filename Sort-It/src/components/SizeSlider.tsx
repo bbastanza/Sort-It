@@ -7,7 +7,7 @@ export default function SizeSlider({
     setDataArray,
 }: ISizeSliderProps) {
     return (
-        <>
+        <div style={{ marginTop: 10 }}>
             <h2>Size</h2>
             <input
                 type="range"
@@ -20,8 +20,8 @@ export default function SizeSlider({
                     setCanSort(true);
                     setDataArray([...changeSize(parseInt(e.target.value))]);
                 }}
-                style={{ width: "20vw", minWidth: 250,marginTop: 10 }}
+                style={{ width: "20vw", minWidth: 250,margin: "10px auto 20px" }}
             />
-        </>
+        </div>
     );
 }

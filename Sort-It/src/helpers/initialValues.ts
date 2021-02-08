@@ -27,6 +27,7 @@ export const initialArray: number[] = [
     24,
     25,
 ];
+ 
 export const initialChartValue: IChartData = {
     labels: initialArray,
     datasets: [

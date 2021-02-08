@@ -9,7 +9,8 @@ export default function Chart({ data }: IChartProps) {
                 height: "50vh",
                 display: "flex",
                 justifyContent: "center",
-                margin: "10px auto 20px",
+                margin: "10px auto 30px",
+                minWidth: 320,
             }}>
             <Bar
                 redraw={true}

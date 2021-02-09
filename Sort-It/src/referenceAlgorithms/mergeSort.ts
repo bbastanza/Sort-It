@@ -1,24 +1,26 @@
 // Merge Sort O(N log N)
 export function mergeSort(array: number[]): number[] {
-    const length: number = array.length;
     for (
         let currentSize: number = 1;
-        currentSize <= length - 1;
+        currentSize <= array.length - 1;
         currentSize = currentSize * 2
     ) {
+
         for (
             let leftStart = 0;
-            leftStart < length - 1;
+            leftStart < array.length - 1;
             leftStart += currentSize * 2
         ) {
             const middle = leftStart + currentSize - 1;
             const rightEnd = Math.min(
                 leftStart + currentSize * 2 - 1,
-                length - 1
+                array.length - 1
             );
+
             merge(array, leftStart, middle, rightEnd);
         }
     }
+
     return array;
 }
 
@@ -30,6 +32,7 @@ function merge(
 ): void {
     const firstNumber: number = middle - left + 1;
     const secondNumber: number = right - middle;
+
     let i: number;
     let j: number;
 
@@ -39,6 +42,7 @@ function merge(
     for (i = 0; i < firstNumber; i++) {
         leftTempArray[i] = array[left + i];
     }
+
     for (j = 0; j < secondNumber; j++) {
         rightTempArray[j] = array[middle + 1 + j];
     }
@@ -55,14 +59,18 @@ function merge(
         }
         left++;
     }
+
     while (i < firstNumber) {
         if (!!leftTempArray[i]) array[left] = leftTempArray[i];
         i++;
         left++;
     }
+
     while (j < secondNumber) {
         if (!!leftTempArray[i]) array[left] = rightTempArray[j];
         j++;
         left++;
     }
 }
+
+// TODO add explanation

@@ -1,17 +1,19 @@
 import { useState, useRef, useEffect } from "react";
-import {
-    initialArray as initArray,
-    initialChartValue as initChart,
-} from "./../helpers/initialValues";
-import { calculateTimeDelay } from "../helpers/calculateTimeDelay";
-import { bubbleswap } from "../helpers/bubbleswap";
-import { IChartData } from "../helpers/interfaces";
-import { delayUpdate } from "./../helpers/delayUpdate";
+
 import DotAnimation from "./DotAnimation";
 import SortTypeButtons from "./SortTypeButtons";
 import SizeSlider from "./SizeSlider";
 import ActionButtons from "./ActionButtons";
 import Chart from "./Chart";
+
+import { IChartData } from "../helpers/interfaces";
+import { calculateTimeDelay } from "../helpers/calculateTimeDelay";
+import { swap } from "../helpers/swap";
+import { pauseExecution } from "./../helpers/pauseExecution";
+import {
+    initialArray as initArray,
+    initialChartValue as initChart,
+} from "./../helpers/initialValues";
 
 export default function Visualizer() {
     const [isSorting, setIsSorting] = useState<boolean>(false);
@@ -31,6 +33,7 @@ export default function Visualizer() {
 
     useEffect((): void => {
         let colors: any = [];
+        console.log(isSorting);
         if (isSorting) {
             for (const number of arrayRef.current) {
                 if (number === orangeValueRef.current) colors.push("#FF7700");
@@ -56,11 +59,11 @@ export default function Visualizer() {
         });
     }, [dataArray, isSorting]);
 
-    async function updateVisualization(
+    async function updateVisual(
         pinkValue: number,
         orangeValue: number = 0
     ): Promise<void> {
-        await delayUpdate(timeDelayRef.current);
+        await pauseExecution(timeDelayRef.current);
         pinkValueRef.current = pinkValue;
         orangeValueRef.current = orangeValue;
         setDataArray([...dataArray]);
@@ -72,9 +75,9 @@ export default function Visualizer() {
             for (let i = 0; i < dataArray.length; i++) {
                 isSorted = true;
                 for (let j = 1; j < dataArray.length - i; j++) {
-                    await updateVisualization(dataArray[j], dataArray[j - 1]);
+                    await updateVisual(dataArray[j], dataArray[j - 1]);
                     if (dataArray[j] < dataArray[j - 1]) {
-                        bubbleswap(dataArray, j, j - 1);
+                        swap(dataArray, j, j - 1);
                         isSorted = false;
                     }
                 }
@@ -91,7 +94,7 @@ export default function Visualizer() {
                 dataArray[j + 1] = dataArray[j];
                 j--;
                 dataArray[j + 1] = current;
-                await updateVisualization(dataArray[j], dataArray[j + 1]);
+                await updateVisual(dataArray[j], dataArray[j + 1]);
             }
         }
         setDataArray([...dataArray]);
@@ -104,7 +107,7 @@ export default function Visualizer() {
                 if (dataArray[j] < dataArray[minimumIdx]) {
                     minimumIdx = j;
                 }
-                await updateVisualization(dataArray[j], dataArray[minimumIdx]);
+                await updateVisual(dataArray[j], dataArray[minimumIdx]);
             }
             if (minimumIdx !== i) {
                 const temp = dataArray[minimumIdx];
@@ -164,11 +167,11 @@ export default function Visualizer() {
             if (leftTempArray[i] <= rightTempArray[j]) {
                 if (!!leftTempArray[i]) array[left] = leftTempArray[i];
                 i++;
-                await updateVisualization(array[left - 1]);
+                await updateVisual(array[left - 1]);
             } else {
                 if (!!leftTempArray[i]) array[left] = rightTempArray[j];
                 j++;
-                await updateVisualization(0, array[left - 1]);
+                await updateVisual(0, array[left - 1]);
             }
             left++;
         }
@@ -176,18 +179,50 @@ export default function Visualizer() {
             if (!!leftTempArray[i]) array[left] = leftTempArray[i];
             i++;
             left++;
-            await updateVisualization(array[left - 1]);
+            await updateVisual(array[left - 1]);
         }
         while (j < secondNumber) {
             if (!!leftTempArray[i]) array[left] = rightTempArray[j];
             j++;
             left++;
-            await updateVisualization(0, array[left - 1]);
+            await updateVisual(0, array[left - 1]);
         }
-        await updateVisualization(0);
+        await updateVisual(0);
     }
 
-    async function quickSort() {}
+    async function quickSort(
+        dataArray: number[],
+        start: number = 0,
+        end: number = dataArray.length - 1
+    ): Promise<void> {
+        if (start >= end) return;
+        let index = await quickSortPartition(dataArray, start, end);
+        await Promise.all([
+            updateVisual(dataArray[start]),
+            quickSort(dataArray, start, index - 1),
+            updateVisual(0, dataArray[end]),
+            quickSort(dataArray, index + 1, end),
+        ]);
+    }
+
+    async function quickSortPartition(
+        dataArray: number[],
+        start: number,
+        end: number
+    ): Promise<number> {
+        let pivotIndex = start;
+        let pivotValue = dataArray[end];
+        for (let i = start; i < end; i++) {
+            if (dataArray[i] < pivotValue) {
+                swap(dataArray, i, pivotIndex);
+                pivotIndex++;
+            }
+            await updateVisual(dataArray[i], dataArray[pivotValue]);
+        }
+        swap(dataArray, pivotIndex, end);
+        await updateVisual(dataArray[pivotIndex], dataArray[end]);
+        return pivotIndex;
+    }
 
     async function performSort(): Promise<void> {
         setCanSort(false);
@@ -203,7 +238,7 @@ export default function Visualizer() {
                 await mergeSort();
                 break;
             case "quick":
-                await quickSort();
+                await quickSort(dataArray);
                 break;
             default:
                 await selectionSort();
@@ -235,7 +270,14 @@ export default function Visualizer() {
                     />
                 </>
             ) : (
-                <DotAnimation />
+                <>
+                    <h5>
+                        {sortType === "merge" || sortType === "quick"
+                            ? "O(n log n)"
+                            : "O(n^2)"}
+                    </h5>
+                    <DotAnimation />
+                </>
             )}
         </div>
     );

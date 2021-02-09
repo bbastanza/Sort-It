@@ -1,4 +1,4 @@
-export function bubbleswap(
+export function swap(
     array: number[],
     index1: number,
     index2: number,

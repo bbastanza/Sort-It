@@ -9,7 +9,9 @@ Check out the app [HERE](https://suspicious-bassi-689da4.netlify.app/)!
 
 #
 
-![screenshot](MDimages/screencast.gif)
+<div align="center">
+  <img width="460" height="300" src="MDimages/screencast.gif">
+</div>
 
 #
 

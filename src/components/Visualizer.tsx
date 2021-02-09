@@ -33,7 +33,7 @@ export default function Visualizer() {
 
     useEffect((): void => {
         let colors: any = [];
-        console.log(isSorting);
+
         if (isSorting) {
             for (const number of arrayRef.current) {
                 if (number === orangeValueRef.current) colors.push("#FF7700");
@@ -41,6 +41,7 @@ export default function Visualizer() {
                     colors.push("#ff8686");
                 else colors.push("#377E86");
             }
+
         } else {
             orangeValueRef.current = 0;
             pinkValueRef.current = 0;
@@ -71,11 +72,15 @@ export default function Visualizer() {
 
     async function bubbleSort(): Promise<void> {
         let isSorted: boolean = false;
+
         while (!isSorted) {
+
             for (let i = 0; i < dataArray.length; i++) {
                 isSorted = true;
+
                 for (let j = 1; j < dataArray.length - i; j++) {
                     await updateVisual(dataArray[j], dataArray[j - 1]);
+
                     if (dataArray[j] < dataArray[j - 1]) {
                         swap(dataArray, j, j - 1);
                         isSorted = false;
@@ -87,9 +92,11 @@ export default function Visualizer() {
 
     async function insertionSort(): Promise<void> {
         orangeValueRef.current = 0;
+
         for (let i = 1; i < dataArray.length; i++) {
             let current: number = dataArray[i];
             let j: number = i - 1;
+
             while (j >= 0 && dataArray[j] > current) {
                 dataArray[j + 1] = dataArray[j];
                 j--;
@@ -103,6 +110,7 @@ export default function Visualizer() {
     async function selectionSort(): Promise<void> {
         for (let i = 0; i < dataArray.length; i++) {
             let minimumIdx = i;
+
             for (let j = i + 1; j < dataArray.length; j++) {
                 if (dataArray[j] < dataArray[minimumIdx]) {
                     minimumIdx = j;
@@ -148,6 +156,7 @@ export default function Visualizer() {
     ): Promise<void> {
         const firstNumber: number = middle - left + 1;
         const secondNumber: number = right - middle;
+
         let i: number;
         let j: number;
 
@@ -163,6 +172,7 @@ export default function Visualizer() {
 
         i = 0;
         j = 0;
+
         while (i < firstNumber && j < secondNumber) {
             if (leftTempArray[i] <= rightTempArray[j]) {
                 if (!!leftTempArray[i]) array[left] = leftTempArray[i];
@@ -175,12 +185,14 @@ export default function Visualizer() {
             }
             left++;
         }
+
         while (i < firstNumber) {
             if (!!leftTempArray[i]) array[left] = leftTempArray[i];
             i++;
             left++;
             await updateVisual(array[left - 1]);
         }
+
         while (j < secondNumber) {
             if (!!leftTempArray[i]) array[left] = rightTempArray[j];
             j++;
@@ -196,7 +208,9 @@ export default function Visualizer() {
         end: number = dataArray.length - 1
     ): Promise<void> {
         if (start >= end) return;
+
         let index = await quickSortPartition(dataArray, start, end);
+
         await Promise.all([
             updateVisual(dataArray[start]),
             quickSort(dataArray, start, index - 1),
@@ -212,13 +226,16 @@ export default function Visualizer() {
     ): Promise<number> {
         let pivotIndex = start;
         let pivotValue = dataArray[end];
+
         for (let i = start; i < end; i++) {
+
             if (dataArray[i] < pivotValue) {
                 swap(dataArray, i, pivotIndex);
                 pivotIndex++;
             }
             await updateVisual(dataArray[i], dataArray[pivotValue]);
         }
+
         swap(dataArray, pivotIndex, end);
         await updateVisual(dataArray[pivotIndex], dataArray[end]);
         return pivotIndex;
@@ -227,6 +244,7 @@ export default function Visualizer() {
     async function performSort(): Promise<void> {
         setCanSort(false);
         setIsSorting(true);
+
         switch (sortType) {
             case "bubble":
                 await bubbleSort();

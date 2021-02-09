@@ -10,7 +10,7 @@ Check out the app [HERE](https://suspicious-bassi-689da4.netlify.app/)!
 #
 
 <div align="center">
-  <img width="700" height="500" src="MDimages/screencast.gif">
+  <img width="600" height="400" src="MDimages/screencast.gif">
 </div>
 
 #

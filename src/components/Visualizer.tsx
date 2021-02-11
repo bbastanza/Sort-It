@@ -29,6 +29,7 @@ export default function Visualizer() {
 
     useEffect((): void => {
         timeDelayRef.current = calculateTimeDelay(dataArray.length, sortType);
+
     }, [dataArray.length, sortType]);
 
     useEffect((): void => {
@@ -64,7 +65,7 @@ export default function Visualizer() {
         pinkValue: number,
         orangeValue: number = 0
     ): Promise<void> {
-        await pauseExecution(timeDelayRef.current);
+       await pauseExecution(timeDelayRef.current);
         pinkValueRef.current = pinkValue;
         orangeValueRef.current = orangeValue;
         setDataArray([...dataArray]);
@@ -73,7 +74,7 @@ export default function Visualizer() {
     async function bubbleSort(): Promise<void> {
         let isSorted: boolean = false;
 
-        while (!isSorted) {
+        while (!!!isSorted) {
 
             for (let i = 0; i < dataArray.length; i++) {
                 isSorted = true;
@@ -268,7 +269,7 @@ export default function Visualizer() {
         <div style={{ marginTop: 20 }}>
             <Chart data={chartData} />
             <h2 style={{ textTransform: "capitalize" }}>{sortType} Sort</h2>
-            {!isSorting ? (
+            {!!!isSorting ? (
                 <>
                     <ActionButtons
                         performSort={performSort}

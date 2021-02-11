@@ -12,6 +12,9 @@ tags
 # Visual Studio Code
 .vscode
 
+# Vim
+.eslintcache
+
 # Rider
 .idea
 

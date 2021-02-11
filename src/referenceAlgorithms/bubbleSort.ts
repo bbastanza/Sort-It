@@ -10,14 +10,14 @@ export function bubbleSort(array: number[]): number[] {
         // Here we start by iterating the array. This is the outer loop.
         for (let i = 0; i < array.length; i++) {
             
-            // We set isSorted to true; if the following statment do not make a 
+            // We set isSorted to true; if the following statement do not make a 
                 // swap we will exit the while loop.
             isSorted = true;
 
             // Here we iterate through the array again. This is the inner loop.
-            // We do an optimazation here which is ```array.lengh - i```
+            // We do an small optimization here which is ```array.length - i```
             // By doing this we do not have to iterate through the end of the
-                // array that is already sorted.
+                // array; that part is already sorted.
             for (let j = 1; j < array.length - i; j++) {
 
                 // Is the number where looking at is greater than the number after it?

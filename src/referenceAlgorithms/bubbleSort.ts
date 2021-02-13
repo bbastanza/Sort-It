@@ -1,5 +1,4 @@
-
-// Bubble Sort | Time 0(N^2) | Space 0(1)
+// Bubble Sort | Time 0(n^2) | Space 0(1)
 
 export function bubbleSort(array: number[]): number[] {
 

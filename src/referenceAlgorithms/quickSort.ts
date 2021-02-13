@@ -1,4 +1,4 @@
-// Quicksort O(N log N)
+// Quicksort | Time O(n log n) | Space
 export function quickSort(
     array: number[],
     start: number = 0,

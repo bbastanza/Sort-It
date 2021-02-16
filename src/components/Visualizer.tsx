@@ -29,7 +29,6 @@ export default function Visualizer() {
 
     useEffect((): void => {
         timeDelayRef.current = calculateTimeDelay(dataArray.length, sortType);
-
     }, [dataArray.length, sortType]);
 
     useEffect((): void => {
@@ -42,7 +41,6 @@ export default function Visualizer() {
                     colors.push("#ff8686");
                 else colors.push("#377E86");
             }
-
         } else {
             orangeValueRef.current = 0;
             pinkValueRef.current = 0;
@@ -65,7 +63,7 @@ export default function Visualizer() {
         pinkValue: number,
         orangeValue: number = 0
     ): Promise<void> {
-       await pauseExecution(timeDelayRef.current);
+        await pauseExecution(timeDelayRef.current);
         pinkValueRef.current = pinkValue;
         orangeValueRef.current = orangeValue;
         setDataArray([...dataArray]);
@@ -75,7 +73,6 @@ export default function Visualizer() {
         let isSorted: boolean = false;
 
         while (!!!isSorted) {
-
             for (let i = 0; i < dataArray.length; i++) {
                 isSorted = true;
 
@@ -93,16 +90,12 @@ export default function Visualizer() {
 
     async function insertionSort(): Promise<void> {
         orangeValueRef.current = 0;
-
         for (let i = 1; i < dataArray.length; i++) {
-            let current: number = dataArray[i];
-            let j: number = i - 1;
-
-            while (j >= 0 && dataArray[j] > current) {
-                dataArray[j + 1] = dataArray[j];
+            let j: number = i;
+            while (j >= 0 && dataArray[j] < dataArray[j - 1]) {
+                swap(dataArray, j, j - 1);
                 j--;
-                dataArray[j + 1] = current;
-                await updateVisual(dataArray[j], dataArray[j + 1]);
+                await updateVisual(dataArray[j - 1], dataArray[j]);
             }
         }
         setDataArray([...dataArray]);
@@ -113,15 +106,12 @@ export default function Visualizer() {
             let minimumIdx = i;
 
             for (let j = i + 1; j < dataArray.length; j++) {
-                if (dataArray[j] < dataArray[minimumIdx]) {
-                    minimumIdx = j;
-                }
+                if (dataArray[j] < dataArray[minimumIdx]) minimumIdx = j;
                 await updateVisual(dataArray[j], dataArray[minimumIdx]);
             }
             if (minimumIdx !== i) {
-                const temp = dataArray[minimumIdx];
-                dataArray[minimumIdx] = dataArray[i];
-                dataArray[i] = temp;
+                swap(dataArray, minimumIdx, i);
+                await updateVisual(dataArray[minimumIdx], dataArray[i]);
             }
         }
         setDataArray([...dataArray]);
@@ -212,12 +202,10 @@ export default function Visualizer() {
 
         let index = await quickSortPartition(dataArray, start, end);
 
-        await Promise.all([
-            updateVisual(dataArray[start]),
-            quickSort(dataArray, start, index - 1),
-            updateVisual(0, dataArray[end]),
-            quickSort(dataArray, index + 1, end),
-        ]);
+        await updateVisual(dataArray[start]);
+        await quickSort(dataArray, start, index - 1);
+        await updateVisual(0, dataArray[end]);
+        await quickSort(dataArray, index + 1, end);
     }
 
     async function quickSortPartition(
@@ -229,7 +217,6 @@ export default function Visualizer() {
         let pivotValue = dataArray[end];
 
         for (let i = start; i < end; i++) {
-
             if (dataArray[i] < pivotValue) {
                 swap(dataArray, i, pivotIndex);
                 pivotIndex++;

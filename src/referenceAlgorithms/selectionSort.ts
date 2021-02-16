@@ -1,4 +1,6 @@
+
 // Selection Sort | Time O(n^2) | Space O(1)
+
 export function selectionSort(array: number[]): number[] {
     // This is the outer loop. For this algorithm we must loop through the array
         // twice.

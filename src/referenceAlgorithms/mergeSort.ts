@@ -1,4 +1,6 @@
+
 // Merge Sort O(N log N)
+
 export function mergeSort(array: number[]): number[] {
     for (
         let currentSize: number = 1;

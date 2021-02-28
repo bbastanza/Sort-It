@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 import DotAnimation from "./DotAnimation";
 import SortTypeButtons from "./SortTypeButtons";
@@ -10,30 +10,22 @@ import { IChartData } from "../helpers/interfaces";
 import { calculateTimeDelay } from "../helpers/calculateTimeDelay";
 import { swap } from "../helpers/swap";
 import { pauseExecution } from "./../helpers/pauseExecution";
-import {
-    initialArray as initArray,
-    initialChartValue as initChart,
-} from "./../helpers/initialValues";
+import { initialArray, initialChartValue } from "./../helpers/initialValues";
 
 export default function Visualizer() {
     const [isSorting, setIsSorting] = useState<boolean>(false);
     const [canSort, setCanSort] = useState<boolean>(false);
     const [sortType, setSortType] = useState<string>("bubble");
-    const [dataArray, setDataArray] = useState<number[]>(initArray);
-    const [chartData, setChartData] = useState<IChartData>(initChart);
+    const [dataArray, setDataArray] = useState<number[]>(initialArray);
+    const [chartData, setChartData] = useState<IChartData>(initialChartValue);
     const orangeValueRef = useRef<number>(0);
     const pinkValueRef = useRef<number>(0);
     const timeDelayRef = useRef<number>(80);
     const arrayRef = useRef<number[]>(dataArray);
     arrayRef.current = dataArray;
 
-    useEffect((): void => {
-        timeDelayRef.current = calculateTimeDelay(dataArray.length, sortType);
-    }, [dataArray.length, sortType]);
-
-    useEffect((): void => {
+    const setColors = useCallback(() => {
         let colors: any = [];
-
         if (isSorting) {
             for (const number of arrayRef.current) {
                 if (number === orangeValueRef.current) colors.push("#FF7700");
@@ -46,18 +38,25 @@ export default function Visualizer() {
             pinkValueRef.current = 0;
             colors = "#377E86";
         }
+        return colors;
+    }, [isSorting]);
 
+    useEffect((): void => {
+        timeDelayRef.current = calculateTimeDelay(dataArray.length, sortType);
+    }, [dataArray.length, sortType]);
+
+    useEffect((): void => {
         setChartData({
             labels: arrayRef.current,
             datasets: [
                 {
                     label: "value",
                     data: arrayRef.current,
-                    backgroundColor: colors,
+                    backgroundColor: setColors(),
                 },
             ],
         });
-    }, [dataArray, isSorting]);
+    }, [dataArray, isSorting, setColors]);
 
     async function updateVisual(
         pinkValue: number,
@@ -72,7 +71,7 @@ export default function Visualizer() {
     async function bubbleSort(): Promise<void> {
         let isSorted: boolean = false;
 
-        while (!!!isSorted) {
+        while (!isSorted) {
             for (let i = 0; i < dataArray.length; i++) {
                 isSorted = true;
 
@@ -256,7 +255,7 @@ export default function Visualizer() {
         <div style={{ marginTop: 20 }}>
             <Chart data={chartData} />
             <h2 style={{ textTransform: "capitalize" }}>{sortType} Sort</h2>
-            {!!!isSorting ? (
+            {!isSorting ? (
                 <>
                     <ActionButtons
                         performSort={performSort}

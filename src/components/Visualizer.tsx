@@ -6,7 +6,7 @@ import SizeSlider from "./SizeSlider";
 import ActionButtons from "./ActionButtons";
 import Chart from "./Chart";
 
-import { IChartData } from "../helpers/interfaces";
+import { ChartData } from "../helpers/interfaces";
 import { calculateTimeDelay } from "../helpers/calculateTimeDelay";
 import { swap } from "../helpers/swap";
 import { pauseExecution } from "./../helpers/pauseExecution";
@@ -17,7 +17,7 @@ export default function Visualizer() {
     const [canSort, setCanSort] = useState<boolean>(false);
     const [sortType, setSortType] = useState<string>("bubble");
     const [dataArray, setDataArray] = useState<number[]>(initialArray);
-    const [chartData, setChartData] = useState<IChartData>(initialChartValue);
+    const [chartData, setChartData] = useState<ChartData>(initialChartValue);
     const orangeValueRef = useRef<number>(0);
     const pinkValueRef = useRef<number>(0);
     const timeDelayRef = useRef<number>(80);
@@ -29,8 +29,7 @@ export default function Visualizer() {
         if (isSorting) {
             for (const number of arrayRef.current) {
                 if (number === orangeValueRef.current) colors.push("#FF7700");
-                else if (number === pinkValueRef.current)
-                    colors.push("#ff8686");
+                else if (number === pinkValueRef.current) colors.push("#ff8686");
                 else colors.push("#377E86");
             }
         } else {
@@ -58,10 +57,7 @@ export default function Visualizer() {
         });
     }, [dataArray, isSorting, setColors]);
 
-    async function updateVisual(
-        pinkValue: number,
-        orangeValue: number = 0
-    ): Promise<void> {
+    async function updateVisual(pinkValue: number, orangeValue: number = 0): Promise<void> {
         await pauseExecution(timeDelayRef.current);
         pinkValueRef.current = pinkValue;
         orangeValueRef.current = orangeValue;
@@ -118,40 +114,22 @@ export default function Visualizer() {
 
     async function mergeSort(): Promise<void> {
         const length: number = dataArray.length;
-        for (
-            let currentSize: number = 1;
-            currentSize <= length - 1;
-            currentSize = currentSize * 2
-        ) {
-            for (
-                let leftStart = 0;
-                leftStart < length - 1;
-                leftStart += currentSize * 2
-            ) {
+        for (let currentSize: number = 1; currentSize <= length - 1; currentSize = currentSize * 2) {
+            for (let leftStart = 0; leftStart < length - 1; leftStart += currentSize * 2) {
                 const middle = leftStart + currentSize - 1;
-                const rightEnd = Math.min(
-                    leftStart + currentSize * 2 - 1,
-                    length - 1
-                );
+                const rightEnd = Math.min(leftStart + currentSize * 2 - 1, length - 1);
                 await merge(dataArray, leftStart, middle, rightEnd);
             }
         }
     }
 
-    async function merge(
-        array: number[],
-        left: number,
-        middle: number,
-        right: number
-    ): Promise<void> {
+    async function merge(array: number[], left: number, middle: number, right: number): Promise<void> {
         const firstNumber: number = middle - left + 1;
         const secondNumber: number = right - middle;
-
-        let i: number;
-        let j: number;
-
         const leftTempArray: number[] = [firstNumber];
         const rightTempArray: number[] = [secondNumber];
+        let i: number;
+        let j: number;
 
         for (i = 0; i < firstNumber; i++) {
             leftTempArray[i] = array[left + i];
@@ -162,7 +140,6 @@ export default function Visualizer() {
 
         i = 0;
         j = 0;
-
         while (i < firstNumber && j < secondNumber) {
             if (leftTempArray[i] <= rightTempArray[j]) {
                 if (!!leftTempArray[i]) array[left] = leftTempArray[i];
@@ -207,11 +184,7 @@ export default function Visualizer() {
         await quickSort(dataArray, index + 1, end);
     }
 
-    async function quickSortPartition(
-        dataArray: number[],
-        start: number,
-        end: number
-    ): Promise<number> {
+    async function quickSortPartition(dataArray: number[], start: number, end: number): Promise<number> {
         let pivotIndex = start;
         let pivotValue = dataArray[end];
 
@@ -264,23 +237,12 @@ export default function Visualizer() {
                         setDataArray={setDataArray}
                         canSort={canSort}
                     />
-                    <SizeSlider
-                        value={dataArray.length}
-                        setCanSort={setCanSort}
-                        setDataArray={setDataArray}
-                    />
-                    <SortTypeButtons
-                        setSortType={setSortType}
-                        sortType={sortType}
-                    />
+                    <SizeSlider value={dataArray.length} setCanSort={setCanSort} setDataArray={setDataArray} />
+                    <SortTypeButtons setSortType={setSortType} sortType={sortType} />
                 </>
             ) : (
                 <>
-                    <h5>
-                        {sortType === "merge" || sortType === "quick"
-                            ? "O(n log n)"
-                            : "O(n^2)"}
-                    </h5>
+                    <h5>{sortType === "merge" || sortType === "quick" ? "O(n log n)" : "O(n^2)"}</h5>
                     <DotAnimation />
                 </>
             )}

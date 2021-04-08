@@ -1,4 +1,4 @@
-import { IChartData } from "./interfaces";
+import { ChartData } from "./interfaces";
 
 export const initialArray: number[] = [
     1,
@@ -27,8 +27,8 @@ export const initialArray: number[] = [
     24,
     25,
 ];
- 
-export const initialChartValue: IChartData = {
+
+export const initialChartValue: ChartData = {
     labels: initialArray,
     datasets: [
         {

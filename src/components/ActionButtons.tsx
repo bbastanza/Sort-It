@@ -1,5 +1,5 @@
 import { shuffleArray } from "../helpers/shuffleArray";
-import { IActionButtonProps } from "../helpers/interfaces";
+import { ActionButtonProps } from "../helpers/interfaces";
 
 export default function ActionButtons({
     performSort,
@@ -7,7 +7,7 @@ export default function ActionButtons({
     setDataArray,
     dataArray,
     canSort,
-}: IActionButtonProps) {
+}: ActionButtonProps) {
     return (
         <div
             style={{
@@ -15,13 +15,11 @@ export default function ActionButtons({
                 display: "flex",
                 justifyContent: "center",
             }}>
-            {canSort ? (
-                <button
-                    className={"btn btn-lg btn-info sort-btn"}
-                    onClick={() => performSort()}>
+            {canSort && (
+                <button className={"btn btn-lg btn-info sort-btn"} onClick={() => performSort()}>
                     Sort It!
                 </button>
-            ) : null}
+            )}
             <button
                 className={"btn btn-secondary sort-btn"}
                 onClick={() => {

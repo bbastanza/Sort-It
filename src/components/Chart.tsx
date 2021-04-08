@@ -1,7 +1,7 @@
 import { Bar } from "react-chartjs-2";
-import { IChartProps } from "./../helpers/interfaces";
+import { ChartProps } from "./../helpers/interfaces";
 
-export default function Chart({ data }: IChartProps) {
+export default function Chart({ data }: ChartProps) {
     return (
         <div
             style={{

@@ -1,10 +1,7 @@
 import { buttonClass } from "../helpers/buttonClass";
-import { ISortTypesProps } from "../helpers/interfaces";
+import { SortTypesProps } from "../helpers/interfaces";
 
-export default function SortTypeButtons({
-    sortType,
-    setSortType,
-}: ISortTypesProps) {
+export default function SortTypeButtons({ sortType, setSortType }: SortTypesProps) {
     return (
         <div
             style={{
@@ -13,14 +10,10 @@ export default function SortTypeButtons({
                 margin: "30px auto 80px",
                 flexFlow: "row wrap",
             }}>
-            <button
-                className={buttonClass("bubble", sortType)}
-                onClick={() => setSortType("bubble")}>
+            <button className={buttonClass("bubble", sortType)} onClick={() => setSortType("bubble")}>
                 Bubble Sort
             </button>
-            <button
-                className={buttonClass("insertion", sortType)}
-                onClick={() => setSortType("insertion")}>
+            <button className={buttonClass("insertion", sortType)} onClick={() => setSortType("insertion")}>
                 Insertion Sort
             </button>
             <button
@@ -29,14 +22,10 @@ export default function SortTypeButtons({
                 onClick={() => setSortType("selection")}>
                 Selection Sort
             </button>
-            <button
-                className={buttonClass("merge", sortType)}
-                onClick={() => setSortType("merge")}>
+            <button className={buttonClass("merge", sortType)} onClick={() => setSortType("merge")}>
                 Merge Sort
             </button>
-            <button
-                className={buttonClass("quick", sortType)}
-                onClick={() => setSortType("quick")}>
+            <button className={buttonClass("quick", sortType)} onClick={() => setSortType("quick")}>
                 Quick Sort
             </button>
         </div>

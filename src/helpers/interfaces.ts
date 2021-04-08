@@ -1,4 +1,4 @@
-export interface IActionButtonProps {
+export interface ActionButtonProps {
     performSort: Function;
     setCanSort: Function;
     setDataArray: Function;
@@ -6,29 +6,41 @@ export interface IActionButtonProps {
     canSort: boolean;
 }
 
-export interface ISizeSliderProps {
+export interface SizeSliderProps {
     setCanSort: Function;
     setDataArray: Function;
     value: number;
 }
 
-export interface ISortTypesProps{
+export interface SortTypesProps {
     setSortType: Function;
     sortType: string;
 }
 
-export interface IChartProps{
-    data: IChartData
+export interface ChartProps {
+    data: ChartData;
 }
 
-export interface IChartData {
+export interface ChartData {
     labels: number[];
-    datasets: IDataSets[];
+    datasets: DataSets[];
 }
 
-interface IDataSets {
+interface DataSets {
     label: string;
     data: number[];
     backgroundColor: any;
 }
 
+export interface DotStyle {
+    width: number;
+    height: number;
+    display: string;
+    margin: number;
+    borderRadius: string;
+}
+
+export interface ContainerStyle {
+    width: number;
+    margin: string;
+}

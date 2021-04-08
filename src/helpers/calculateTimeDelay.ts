@@ -1,38 +1,27 @@
 export function calculateTimeDelay(length: number, sortType: string): number {
-    let timeDelay: number;
     if (sortType === "merge" || sortType === "quick") {
         switch (true) {
             case length <= 25:
-                timeDelay = 120;
-                break;
+                return 120;
             case length <= 45:
-                timeDelay = 80;
-                break;
+                return 80;
             case length <= 65:
-                timeDelay = 60;
-                break;
+                return 60;
             default:
-                timeDelay = 40;
-                break;
-        }
-    } else {
-        switch (true) {
-            case length <= 25:
-                timeDelay = 80;
-                break;
-            case length <= 45:
-                timeDelay = 40;
-                break;
-            case length <= 65:
-                timeDelay = 15;
-                break;
-            case length <= 85:
-                timeDelay = 2;
-                break;
-            default:
-                timeDelay = 1;
-                break;
+                return 40;
         }
     }
-    return timeDelay;
+
+    switch (true) {
+        case length <= 25:
+            return 80;
+        case length <= 45:
+            return 40;
+        case length <= 65:
+            return 15;
+        case length <= 85:
+            return 2;
+        default:
+            return 1;
+    }
 }

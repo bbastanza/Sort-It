@@ -1,13 +1,104 @@
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+        "Droid Sans", "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+@font-face {
+    src: url(fonts/groovy.ttf);
+    font-family: groovy;
+}
+
+.App {
+    margin-top: 20px;
+    text-align: center;
+    color: #414141;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1,
+h2,
+h5 {
+    font-family: groovy;
+    font-size: 2rem;
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 50%;
+    height: 5px;
+    background: #377e86;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: 0.2s;
+    transition: opacity 0.2s;
+}
+
+.slider:hover {
+    opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #111;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #313131;
+    cursor: pointer;
+}
+
+.sort-btn {
+    margin: 0 10px 20px;
+}
+
+.myfooter {
+    background-color: #377e86;
+    color: #c5c5c5;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+}
+
+.footer-link {
+    color: #f1f1f1;
+}
+
+.footer-link:hover {
+    color: #313131;
+    text-decoration: none;
+}
+
+@keyframes jump-up {
+    50% {
+        transform: translate(0, 10px);
+    }
+}
+
+.dot1 {
+    background-color: #306d74;
+    animation: jump-up 0.8s 0.1s linear infinite;
+}
+
+.dot2 {
+    background-color: #6c757d;
+    animation: jump-up 0.8s 0.2s linear infinite;
+}
+
+.dot3 {
+    background-color: #5bcedb;
+    animation: jump-up 0.8s 0.3s linear infinite;
 }

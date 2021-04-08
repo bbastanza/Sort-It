@@ -1,11 +1,7 @@
 import { changeSize } from "../helpers/changesize";
-import { ISizeSliderProps } from "../helpers/interfaces";
+import { SizeSliderProps } from "../helpers/interfaces";
 
-export default function SizeSlider({
-    value,
-    setCanSort,
-    setDataArray,
-}: ISizeSliderProps) {
+export default function SizeSlider({ value, setCanSort, setDataArray }: SizeSliderProps) {
     return (
         <div style={{ marginTop: 10 }}>
             <h2>Size</h2>
@@ -16,11 +12,11 @@ export default function SizeSlider({
                 step="20"
                 value={value}
                 className="slider"
-                onChange={(e) => {
+                onChange={e => {
                     setCanSort(true);
                     setDataArray([...changeSize(parseInt(e.target.value))]);
                 }}
-                style={{ width: "20vw", minWidth: 250,margin: "10px auto 20px" }}
+                style={{ width: "20vw", minWidth: 250, margin: "10px auto 20px" }}
             />
         </div>
     );
